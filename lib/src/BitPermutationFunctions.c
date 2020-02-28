@@ -1,8 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "BitPermutationFunctions.h"
-#include "permTables.h"
+
+ #ifdef __cplusplus
+ extern "C"
+ {
+ #endif
+ #include "BitPermutationFunctions.h"
+ #include "permTables.h"
+ #ifdef __cplusplus
+ }
+ #endif
 
 /**
 * @brief final permutation function

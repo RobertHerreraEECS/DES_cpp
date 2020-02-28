@@ -39,8 +39,6 @@
 	int findDestinationBit4Bit(int goalBit);
 	int findDesiredByte4Bit(int goalByte);
 
-
-
  #ifdef __cplusplus
  }
  #endif

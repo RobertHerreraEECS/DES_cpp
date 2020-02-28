@@ -1,15 +1,6 @@
 #ifndef DES_ENCRYPT_H
 #define DES_ENCRYPT_H
 
-#include "encrypt.h"
- #include "desEncrypt.h"
- #include "BitPermutationFunctions.h"
- #include <stdio.h>
- #include <stdlib.h>
- #include <string.h>
-
-#define HELLO 4
-
 #ifdef __cplusplus
 extern "C"
 {

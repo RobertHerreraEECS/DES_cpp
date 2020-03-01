@@ -16,12 +16,10 @@ extern "C"
 }
 #endif
 
-#define MAX_SIZE sizeof(uint64_t) * 8
-#define NUM_SUB_KEYS 16
-#define NUM_BLOCKS 16
 
-//NOTE: Under construction. Currently refactoring code to be more linear in fashion
-// and less memcpy heavy and get rid of unecessary 2d arrays.
+#define MAX_SIZE sizeof(uint64_t) * 8
+#define NUM_BLOCKS 16
+#define NUM_SUB_KEYS 16
 
 
 void encryptUsingRandomKey(){
@@ -39,8 +37,8 @@ void encryptUsingRandomKey(){
 
 
 void desEncryptionPer64(char* message,char* key){
-    // num sub keys = 16
-	int i,j;
+
+	int i,j,k;
 	uint64_t key_plus = 0x0;
 	uint64_t _ip = 0x0;
 	uint64_t K[NUM_SUB_KEYS] = {0};
@@ -51,7 +49,6 @@ void desEncryptionPer64(char* message,char* key){
 
     uint64_t _message = 0x0123456789ABCDEF;
 	uint64_t keys = 0x133457799BBCDFF1;
-	printf("0x%llx\n",keys);
 
     // load key in big endian and perform PC-1
 	for (i = 0; i < sizeof(uint64_t) * 7; i++) {
@@ -78,6 +75,7 @@ void desEncryptionPer64(char* message,char* key){
             temp = _c[i];
         }
 
+        // clear high bits
         _c[i] = (_c[i] << 4) >> 4;
         _d[i] = (_d[i] << 4) >> 4;
     } 
@@ -93,7 +91,7 @@ void desEncryptionPer64(char* message,char* key){
 	for (i = 0; i < NUM_SUB_KEYS; i++) {
         for (j = 0; j < (sizeof(uint64_t) * 6); j++)
 	    K[i] |= (_cd[i] >> ((sizeof(uint64_t) * 7) - PC2[j]) & 0x1) 
-             << ((sizeof(uint64_t) * 6) - i - 1);
+             << ((sizeof(uint64_t) * 6) - j - 1);
 	}
 
     // == encode message ==
@@ -113,32 +111,101 @@ void desEncryptionPer64(char* message,char* key){
     r[0] |= _ip;
     l[0] = _ip >> 32;
 
-    printf("r0\n");
-    for (i = 31; i > -1; i--)
-	printf("%d", (r[0] >> i) & 0x01);
-    printf("\n");
-
     //for (i = 1; i <= NUM_BLOCKS; i++) {
     //	l[i] = r[i-1];
     //	r[i] = l[i-1] ^ f(r[i-1],K[i]);
     //}
 
-    printf("Expand r0\n");
+    // === f function
 
+    // expand right block (E)
     uint64_t _e = 0x0;
-    // expand block
-	//for (i = 0; i < NUM_SUB_KEYS; i++) {
     for (j = 0; j < 48; j++)
-    _e |= (r[0] >> (E[j]) & 0x1) << (j);
-	//}
+    _e |= (((uint64_t) (r[0] >>  (32 - E[j])) & 0x1) << (48 - j - 1));
 
-    for (i = 63; i > -1; i--)
-	printf("%d", (_e >> i) & 0x01);
+
+    uint64_t output = _e ^ K[0];
+
+    // === s box lookup ==
+    int count = 48;
+    int sBoxCount = 1;
+    uint32_t sLookup = 0x0;
+    while (count != 0) {
+
+        count -= 6;
+
+        // extract 6 bits at a time from output of e ^ K
+        uint8_t sCmpn = ((output >> (count)) << 2) >> 2;
+
+	    uint8_t row = 0;
+	    uint8_t column = 0;
+	    row = (((sCmpn >> 5) & 1) << 1) | (sCmpn & 1);
+	    column = (sCmpn >> 1) & 0xf;
+
+	    int index = ((16*(row))+(column));
+        switch(sBoxCount) {
+        	case 1:
+                sLookup |= S1[index];
+                sLookup = sLookup << 4;
+                break;
+            case 2:
+            	sLookup |= S2[index];
+                sLookup = sLookup << 4;
+            	break;
+            case 3:
+            	sLookup |= S3[index];
+                sLookup = sLookup << 4;
+            	break;
+            case 4:
+            	sLookup |= S4[index];
+                sLookup = sLookup << 4;
+            	break;
+            case 5:
+            	sLookup |= S5[index];
+                sLookup = sLookup << 4;
+            	break;
+            case 6:
+            	sLookup |= S6[index];
+                sLookup = sLookup << 4;
+            	break;
+            case 7:
+                sLookup |= S7[index];
+                sLookup = sLookup << 4;
+                break;
+            case 8:
+                sLookup |= S8[index];
+                break;
+        	default:
+        	    break;
+        }
+        sBoxCount++;
+    }
+    for (i = 31; i > -1; i--)
+	printf("%d", (sLookup >> i) & 0x01);
+    printf("\n");
+
+    // 0 1 
+    // 0 
+
+    //final perm 
+    uint32_t pOut = 0;
+	for (j = 0; j < 32; j++)
+    pOut |= ((sLookup >>  (uint32_t) 32 - P[j]) & 0x1) << (uint32_t)(31-j);
+
+	for (i = 31; i > -1; i--)
+	printf("%d", (pOut >> i) & 0x01);
     printf("\n");
 
 
-}
+    r[1] = l[0] ^ pOut;
 
+    for (i = 31; i > -1; i--)
+	printf("%d", (r[1] >> i) & 0x01);
+    printf("\n");
+
+    // end f function
+    
+}
 
 void desDecryptionPer64(char* message,char* key){
 	 char pk[8]; // 56 bit permutation
@@ -178,4 +245,33 @@ void desDecryptionPer64(char* message,char* key){
 	 memcpy(message,finalOutput,8);
 }
 
+void printCharBinary(char* message) {
+ int i,j;
+
+  for (j = 0; j < 8; j++) {
+ 	for( i = 7; i >= 0; i--) {
+	 	printf("%d",(message[j] >> i) & 0x01);
+ 	}
+	printf("\n");
+ }
+ printf("\n");
+ 
+}
+
+void printCharHex(char* message) {
+ int i;
+ 	for( i = 0; i < 8; i++) {
+	 	printf("%02x ",message[i] & 0xff);
+ 	}
+	printf("\n");
+}
+
+void printIntBinary(int message) {
+ int i,j;
+
+ 	for( i = 7; i >= 0; i--) {
+	 	printf("%d",(message >> i) & 0x01);
+ 	}
+	printf("\n");
+}
 

@@ -11,6 +11,8 @@ extern "C"
 	void printCharHex(char* message);
 	void desEncryptionPer64(char* message,char* key);
 	void desDecryptionPer64(char* message,char* key);
+	uint32_t sBoxPermutation (uint32_t block, uint64_t key);
+	uint64_t encrypt(uint64_t message,uint64_t key);
 
 #ifdef __cplusplus 
 }

@@ -16,7 +16,7 @@ extern "C"
     std::cout << "=== DES Encryption Program ===" << std::endl;
     std::cout << "Encrypting message using random key..." << std::endl;
 
-    encryptUsingRandomKey();
+    desEncryptECB();
 
     return 0;
  }

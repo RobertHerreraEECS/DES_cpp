@@ -1,17 +1,9 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <arpa/inet.h>
-
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 	#include "desEncrypt.h"
-	#include "encrypt.h"
-	#include "BitPermutationFunctions.h"
-	#include "permTables.h"
 #ifdef __cplusplus
 }
 #endif
@@ -24,8 +16,7 @@ extern "C"
 #define NUM_BLOCKS 16
 #define NUM_SUB_KEYS 16
 
-void encryptUsingRandomKey(){
-
+void desEncryptECB(){
 	uint64_t message = 0x0123456789ABCDEF;
 	uint64_t key = 0x133457799BBCDFF1;
 
@@ -33,25 +24,80 @@ void encryptUsingRandomKey(){
 	uint64_t ciphertext = encrypt(message,key);
 	printf("ciphertext: %llx\n",ciphertext);
 
+	uint64_t plaintext = decrypt(ciphertext,key);
+	printf("ciphertext to decrypt: %llx\n",plaintext);
 
 }// end
 
-uint64_t encrypt(uint64_t message,uint64_t key) {
+uint64_t encrypt(const uint64_t message,const uint64_t key) {
+   return DES(message,key,false);
+}
 
+uint64_t decrypt(const uint64_t message,const uint64_t key) {
+    return DES(message,key,true);
+}
+
+uint64_t DES(const uint64_t message,const uint64_t key, const bool decrypt) {
     int i,j,k;
-	uint64_t key_plus = 0;
 	uint64_t _ip = 0;
 	uint64_t K[NUM_SUB_KEYS] = {0};
+
+	generateSubKeys(key,K);
+
+    // encode message
+	for (i = 0; i < INT_SIZE64; i++) {
+	_ip |= (uint64_t) (
+		        ((message >> (uint64_t) (MAX_SIZE - IP[i]) ) & 0x1) 
+		        << (MAX_SIZE - 1 - i));
+	}
+
+    // split permutated message
+    uint32_t r[NUM_BLOCKS + 1];
+    uint32_t l[NUM_BLOCKS + 1];
+    r[0] |= _ip;
+    l[0] = _ip >> ((INT_SIZE64) / 2);
+
+    // rounds
+    if (!decrypt) {
+        for (i = 1; i <= NUM_BLOCKS; i++) {
+    		l[i] = r[i-1];
+    		r[i] = l[i-1] ^ sBoxPermutation(r[i-1],K[i-1]);
+    	}
+    } else {
+    	for (i = 1; i <= NUM_BLOCKS; i++) {
+    		l[i] = r[i-1];
+    		r[i] = l[i-1] ^ sBoxPermutation(r[i-1],K[NUM_SUB_KEYS - i]);
+    	}
+    }
+
+    uint64_t concatBlocks = 0;
+    concatBlocks |= r[16];
+    concatBlocks = concatBlocks << ((INT_SIZE64) / 2);
+    concatBlocks |= l[16];
+
+    // inverse permutation
+    uint64_t finalPermutation = 0;
+    for (j = 0; j < INT_SIZE64; j++)
+    finalPermutation |= ((concatBlocks >>  ((uint64_t) INT_SIZE64 - FP[j])) & 0x1) 
+                        << (uint64_t)(INT_SIZE64 - 1 - j);
+	return finalPermutation;
+}
+
+void generateSubKeys(const uint64_t key, uint64_t *subKeys) {
+    
+    int i,j;
+	uint64_t key_plus = 0;
 	uint32_t _c[NUM_SUB_KEYS+1] = {0};
 	uint32_t _d[NUM_SUB_KEYS+1] = {0};
 	uint64_t _cd[NUM_SUB_KEYS] = {0};
+
 	int shiftSchedule[NUM_SUB_KEYS] = {1,1,2,2,2,2,2,2,1,2,2,2,2,2,2,1};
 
-    // load key in big endian and perform PC-1
+	// load key in big endian and perform PC-1
 	for (i = 0; i < INT_SIZE56; i++) {
-	key_plus |= (uint64_t) (
-		        ((key >> (uint64_t) (MAX_SIZE - PC1[i]) ) & 0x1) 
-		        << (MAX_SIZE - 1 - i));
+		key_plus |= (uint64_t) (
+		    ((key >> (uint64_t) (MAX_SIZE - PC1[i]) ) & 0x1) 
+		    << (MAX_SIZE - 1 - i));
 	}
 
     // seperate permutation into c and d blocks
@@ -87,43 +133,12 @@ uint64_t encrypt(uint64_t message,uint64_t key) {
     // generate subkeys
 	for (i = 0; i < NUM_SUB_KEYS; i++) {
         for (j = 0; j < (INT_SIZE48); j++)
-	    K[i] |= (_cd[i] >> ((INT_SIZE56) - PC2[j]) & 0x1) 
+	    subKeys[i] |= (_cd[i] >> ((INT_SIZE56) - PC2[j]) & 0x1) 
              << ((INT_SIZE48) - j - 1);
 	}
-
-    // encode message
-	for (i = 0; i < INT_SIZE64; i++) {
-	_ip |= (uint64_t) (
-		        ((message >> (uint64_t) (MAX_SIZE - IP[i]) ) & 0x1) 
-		        << (MAX_SIZE - 1 - i));
-	}
-
-    // split permutated message
-    uint32_t r[NUM_BLOCKS + 1];
-    uint32_t l[NUM_BLOCKS + 1];
-    r[0] |= _ip;
-    l[0] = _ip >> ((INT_SIZE64) / 2);
-
-    // rounds
-    for (i = 1; i <= NUM_BLOCKS; i++) {
-    	l[i] = r[i-1];
-    	r[i] = l[i-1] ^ sBoxPermutation(r[i-1],K[i-1]);
-    }
-
-    uint64_t concatBlocks = 0;
-    concatBlocks |= r[16];
-    concatBlocks = concatBlocks << ((INT_SIZE64) / 2);
-    concatBlocks |= l[16];
-
-    // inverse permutation
-    uint64_t finalPermutation = 0;
-    for (j = 0; j < INT_SIZE64; j++)
-    finalPermutation |= ((concatBlocks >>  ((uint64_t) INT_SIZE64 - FP[j])) & 0x1) 
-                        << (uint64_t)(INT_SIZE64 - 1 - j);
-	return finalPermutation;
 }
 
-uint32_t sBoxPermutation (uint32_t block, uint64_t key) {
+uint32_t sBoxPermutation (const uint32_t block, uint64_t key) {
 
 	int j;
 	uint32_t pOut = 0;

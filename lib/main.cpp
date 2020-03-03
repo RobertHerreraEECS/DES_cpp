@@ -14,9 +14,10 @@ extern "C"
 
  int main(int argc, char *argv[]){
     std::cout << "=== DES Encryption Program ===" << std::endl;
-    std::cout << "Encrypting message using random key..." << std::endl;
 
-    desEncryptECB();
+    uint64_t a[2] = {0};
+    uint64_t key = 0;
+    desEncryptECB(a,key);
 
     return 0;
  }

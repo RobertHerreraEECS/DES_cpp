@@ -19,6 +19,7 @@ extern "C"
 void desEncryptECB(uint64_t *message, uint64_t key){
 	// uint64_t message = 0x0123456789ABCDEF;
 	// uint64_t key = 0x133457799BBCDFF1;
+	printf("[*] Encrypting Message Using: DES ECB Mode.\n");
 
 	// printf("message to encrypt: %llx\n", message);
 	// uint64_t ciphertext = encrypt(message,key);
@@ -29,9 +30,10 @@ void desEncryptECB(uint64_t *message, uint64_t key){
 
 }// end
 
-void desEncryptECB(uint64_t *ciphertext, uint64_t key){
+void desDecryptECB(uint64_t *ciphertext, uint64_t key){
 	// uint64_t message = 0x0123456789ABCDEF;
 	// uint64_t key = 0x133457799BBCDFF1;
+	printf("[*] Decrypting Message Using: DES ECB Mode.\n");
 
 	// printf("message to encrypt: %llx\n", message);
 	// uint64_t ciphertext = encrypt(message,key);
@@ -42,7 +44,7 @@ void desEncryptECB(uint64_t *ciphertext, uint64_t key){
 
 }// end
 
-uint64_t encrypt(const uint64_t message,const `uint64_t key) {
+uint64_t encrypt(const uint64_t message,const uint64_t key) {
    return DES(message,key,false);
 }
 

@@ -13,7 +13,8 @@ extern "C"
 
 	#include "permTables.h"
 
-	void desEncryptECB();
+	void desEncryptECB(uint64_t *message, uint64_t key);
+	void desDecryptECB(uint64_t *ciphertext, uint64_t key);
 	uint32_t sBoxPermutation (const uint32_t block, uint64_t key);
 	void generateSubKeys(const uint64_t key, uint64_t *subKeys);
 	uint64_t encrypt(const uint64_t message,const uint64_t key);

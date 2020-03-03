@@ -16,20 +16,33 @@ extern "C"
 #define NUM_BLOCKS 16
 #define NUM_SUB_KEYS 16
 
-void desEncryptECB(){
-	uint64_t message = 0x0123456789ABCDEF;
-	uint64_t key = 0x133457799BBCDFF1;
+void desEncryptECB(uint64_t *message, uint64_t key){
+	// uint64_t message = 0x0123456789ABCDEF;
+	// uint64_t key = 0x133457799BBCDFF1;
 
-	printf("message to encrypt: %llx\n", message);
-	uint64_t ciphertext = encrypt(message,key);
-	printf("ciphertext: %llx\n",ciphertext);
+	// printf("message to encrypt: %llx\n", message);
+	// uint64_t ciphertext = encrypt(message,key);
+	// printf("ciphertext: %llx\n",ciphertext);
 
-	uint64_t plaintext = decrypt(ciphertext,key);
-	printf("ciphertext to decrypt: %llx\n",plaintext);
+	// uint64_t plaintext = decrypt(ciphertext,key);
+	// printf("ciphertext to decrypt: %llx\n",plaintext);
 
 }// end
 
-uint64_t encrypt(const uint64_t message,const uint64_t key) {
+void desEncryptECB(uint64_t *ciphertext, uint64_t key){
+	// uint64_t message = 0x0123456789ABCDEF;
+	// uint64_t key = 0x133457799BBCDFF1;
+
+	// printf("message to encrypt: %llx\n", message);
+	// uint64_t ciphertext = encrypt(message,key);
+	// printf("ciphertext: %llx\n",ciphertext);
+
+	// uint64_t plaintext = decrypt(ciphertext,key);
+	// printf("ciphertext to decrypt: %llx\n",plaintext);
+
+}// end
+
+uint64_t encrypt(const uint64_t message,const `uint64_t key) {
    return DES(message,key,false);
 }
 

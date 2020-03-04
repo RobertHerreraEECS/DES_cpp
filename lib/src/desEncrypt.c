@@ -16,32 +16,24 @@ extern "C"
 #define NUM_BLOCKS 16
 #define NUM_SUB_KEYS 16
 
-void desEncryptECB(uint64_t *message, uint64_t key){
-	// uint64_t message = 0x0123456789ABCDEF;
-	// uint64_t key = 0x133457799BBCDFF1;
+uint64_t* desEncryptECB(uint64_t *message, int len, uint64_t key){
 	printf("[*] Encrypting Message Using: DES ECB Mode.\n");
-
-	// printf("message to encrypt: %llx\n", message);
-	// uint64_t ciphertext = encrypt(message,key);
-	// printf("ciphertext: %llx\n",ciphertext);
-
-	// uint64_t plaintext = decrypt(ciphertext,key);
-	// printf("ciphertext to decrypt: %llx\n",plaintext);
-
+	int i;
+	uint64_t *a = malloc(sizeof(uint64_t) * len);
+	for (i = 0; i < len; i++) {
+		a[i] = encrypt(message[i],key);
+	}
+	return a;
 }// end
 
-void desDecryptECB(uint64_t *ciphertext, uint64_t key){
-	// uint64_t message = 0x0123456789ABCDEF;
-	// uint64_t key = 0x133457799BBCDFF1;
+uint64_t* desDecryptECB(uint64_t *ciphertext, int len,  uint64_t key){
 	printf("[*] Decrypting Message Using: DES ECB Mode.\n");
-
-	// printf("message to encrypt: %llx\n", message);
-	// uint64_t ciphertext = encrypt(message,key);
-	// printf("ciphertext: %llx\n",ciphertext);
-
-	// uint64_t plaintext = decrypt(ciphertext,key);
-	// printf("ciphertext to decrypt: %llx\n",plaintext);
-
+	int i;
+	uint64_t *a = malloc(sizeof(uint64_t) * len);
+	for (i = 0; i < len; i++) {
+		a[i] = decrypt(ciphertext[i],key);
+	}
+	return a;
 }// end
 
 uint64_t encrypt(const uint64_t message,const uint64_t key) {

@@ -19,7 +19,8 @@ extern "C"
 uint64_t* desEncryptECB(uint64_t *message, int len, uint64_t key){
 	printf("[*] Encrypting Message Using: DES ECB Mode.\n");
 	int i;
-	uint64_t *a = malloc(sizeof(uint64_t) * len);
+	uint64_t *a = (uint64_t *) malloc(sizeof(uint64_t) * len);
+	memset(a,0,sizeof(uint64_t) * len);
 	for (i = 0; i < len; i++) {
 		a[i] = encrypt(message[i],key);
 	}
@@ -29,7 +30,8 @@ uint64_t* desEncryptECB(uint64_t *message, int len, uint64_t key){
 uint64_t* desDecryptECB(uint64_t *ciphertext, int len,  uint64_t key){
 	printf("[*] Decrypting Message Using: DES ECB Mode.\n");
 	int i;
-	uint64_t *a = malloc(sizeof(uint64_t) * len);
+	uint64_t *a = (uint64_t *) malloc(sizeof(uint64_t) * len);
+	memset(a,0,sizeof(uint64_t) * len);
 	for (i = 0; i < len; i++) {
 		a[i] = decrypt(ciphertext[i],key);
 	}
@@ -48,6 +50,8 @@ uint64_t DES(const uint64_t message,const uint64_t key, const bool decrypt) {
     int i,j,k;
 	uint64_t _ip = 0;
 	uint64_t K[NUM_SUB_KEYS] = {0};
+	uint32_t r[NUM_BLOCKS + 1] = {0};
+    uint32_t l[NUM_BLOCKS + 1] = {0};
 
 	generateSubKeys(key,K);
 
@@ -59,8 +63,6 @@ uint64_t DES(const uint64_t message,const uint64_t key, const bool decrypt) {
 	}
 
     // split permutated message
-    uint32_t r[NUM_BLOCKS + 1];
-    uint32_t l[NUM_BLOCKS + 1];
     r[0] |= _ip;
     l[0] = _ip >> ((INT_SIZE64) / 2);
 
@@ -73,7 +75,7 @@ uint64_t DES(const uint64_t message,const uint64_t key, const bool decrypt) {
     } else {
     	for (i = 1; i <= NUM_BLOCKS; i++) {
     		l[i] = r[i-1];
-    		r[i] = l[i-1] ^ sBoxPermutation(r[i-1],K[NUM_SUB_KEYS - i]);
+    		r[i] = l[i-1] ^ sBoxPermutation(r[i-1],K[NUM_SUB_KEYS -  i]);
     	}
     }
 

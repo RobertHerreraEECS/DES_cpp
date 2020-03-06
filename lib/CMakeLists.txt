@@ -7,5 +7,5 @@ add_executable(main main.cpp
    src/desEncrypt.c
 )
 
-#add_compile_options(-fmain) #enables concepts(unstable). 
+add_compile_options(-std=c++11 -stdlib=libc++)
 

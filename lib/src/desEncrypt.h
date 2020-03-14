@@ -53,7 +53,7 @@ extern "C"
     * @param key 64 bit key
     * @return uint64_t 64 bit ciphertext
     */
-	uint64_t encrypt(const uint64_t message,const uint64_t key);
+	uint64_t _encrypt(const uint64_t message,const uint64_t key);
 
    /**
     * @brief Decrypt an array of 64 bit data
@@ -61,7 +61,7 @@ extern "C"
     * @param key 64 bit key
     * @return uint64_t 64 bit plaintext
     */
-	uint64_t decrypt(const uint64_t message,const uint64_t key);
+	uint64_t _decrypt(const uint64_t message,const uint64_t key);
 
     /**
     * @brief Encrypt an array of 64 bit data with a 64 bit key

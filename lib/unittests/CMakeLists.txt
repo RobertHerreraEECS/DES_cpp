@@ -32,5 +32,5 @@ endif()
 
 # Now simply link against gtest or gtest_main as needed. Eg
 add_executable(desTest desFullEncryptionTest.cpp)
-target_link_libraries(desTest gtest_main)
+target_link_libraries(desTest gtest_main des_src)
 add_test(NAME des_test COMMAND desTest)

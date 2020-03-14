@@ -12,9 +12,10 @@ DES Encryption is a c++ based application that aims to re-work an initial implem
 ## TODO
 * Fix cmake RPATH issue with shared libraries
 * Add more wrapping logic
-** Add encryption via file input
+* Add encryption via file input
 * Add user interface
-* Add google tests
+* Add unit tests
+* Add zero padding
 
 # DES_cpp
 

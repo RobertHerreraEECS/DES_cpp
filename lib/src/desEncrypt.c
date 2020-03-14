@@ -23,7 +23,7 @@ uint64_t* desEncryptECB(uint64_t *message, int len, uint64_t key){
 	uint64_t *a = (uint64_t *) malloc(sizeof(uint64_t) * len);
 	memset(a,0,sizeof(uint64_t) * len);
 	for (i = 0; i < len; i++) {
-		a[i] = encrypt(message[i],key);
+		a[i] = _encrypt(message[i],key);
 	}
 	return a;
 }// end
@@ -36,16 +36,16 @@ uint64_t* desDecryptECB(uint64_t *ciphertext, int len,  uint64_t key){
 	uint64_t *a = (uint64_t *) malloc(sizeof(uint64_t) * len);
 	memset(a,0,sizeof(uint64_t) * len);
 	for (i = 0; i < len; i++) {
-		a[i] = decrypt(ciphertext[i],key);
+		a[i] = _decrypt(ciphertext[i],key);
 	}
 	return a;
 }// end
 
-uint64_t encrypt(const uint64_t message,const uint64_t key) {
+uint64_t _encrypt(const uint64_t message,const uint64_t key) {
    return DES(message,key,false);
 }
 
-uint64_t decrypt(const uint64_t message,const uint64_t key) {
+uint64_t _decrypt(const uint64_t message,const uint64_t key) {
     return DES(message,key,true);
 }
 

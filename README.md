@@ -10,7 +10,16 @@ DES Encryption is a c++ based application that aims to re-work an initial implem
 
 
 ## TODO
-
-* Investigate cause of memory leak in the initial implementation. 
 * Fix cmake RPATH issue with shared libraries
-* Rework functions as necessary # DES_cpp
+* Add more wrapping logic
+** Add encryption via file input
+* Add user interface
+* Add google tests
+
+# DES_cpp
+
+* Interface layer that handles file reading and encryption/decryption modes
+
+# DES
+
+* C Implementation of DES Cipher

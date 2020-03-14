@@ -1,4 +1,3 @@
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -17,7 +16,9 @@ extern "C"
 #define NUM_SUB_KEYS 16
 
 uint64_t* desEncryptECB(uint64_t *message, int len, uint64_t key){
+#ifdef DEBUG
 	printf("[*] Encrypting Message Using: DES ECB Mode.\n");
+#endif
 	int i;
 	uint64_t *a = (uint64_t *) malloc(sizeof(uint64_t) * len);
 	memset(a,0,sizeof(uint64_t) * len);
@@ -28,7 +29,9 @@ uint64_t* desEncryptECB(uint64_t *message, int len, uint64_t key){
 }// end
 
 uint64_t* desDecryptECB(uint64_t *ciphertext, int len,  uint64_t key){
+#ifdef DEBUG
 	printf("[*] Decrypting Message Using: DES ECB Mode.\n");
+#endif
 	int i;
 	uint64_t *a = (uint64_t *) malloc(sizeof(uint64_t) * len);
 	memset(a,0,sizeof(uint64_t) * len);

@@ -1,11 +1,14 @@
+include_directories(src)
+link_directories(src)
 
-include_directories(src/)
-link_directories(src/)
-add_subdirectory(src)
+# C src code
+set(SRC_DIR src)
 
-add_executable(main main.cpp
-   src/desEncrypt.c
+# main executable
+add_executable(
+  main
+  main.cpp
+  encryption.cpp
+  ${SRC_DIR}/desEncrypt.c
 )
-
-add_compile_options(-std=c++11 -stdlib=libc++)
 

@@ -1,6 +1,8 @@
 cmake_minimum_required (VERSION 3.1.0)
 project (encryption)
 
+set(CMAKE_CXX_STANDARD 11)
+
 # use, i.e. don't skip the full RPATH for the build tree
 SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
 

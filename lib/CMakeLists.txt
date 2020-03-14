@@ -12,3 +12,4 @@ add_executable(
   ${SRC_DIR}/desEncrypt.c
 )
 
+add_subdirectory(unittests)

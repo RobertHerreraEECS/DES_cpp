@@ -10,8 +10,17 @@ DES Encryption is a c++ based application that aims to re-work an initial implem
 
 * To execute:
 <pre>
+    # make build environment at root directory level
+    mkdir build
+    cd build
 	cmake ../
-	make  
+	make
+
+    # execute main program
+    ./lib/main
+
+    # execute and validate unit tests
+    ./lib/unittests/desTest
 </pre>
 
 

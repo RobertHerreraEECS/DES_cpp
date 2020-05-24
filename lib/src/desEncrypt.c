@@ -27,18 +27,16 @@ uint64_t _decrypt(const uint64_t message,const uint64_t key) {
 
 uint64_t DES(const uint64_t message,const uint64_t key, const bool decrypt) {
     int i,j,k;
-	uint64_t _ip = 0;
-	uint64_t K[NUM_SUB_KEYS] = {0};
-	uint32_t r[NUM_BLOCKS + 1] = {0};
+    uint64_t _ip = 0;
+    uint64_t K[NUM_SUB_KEYS] = {0};
+    uint32_t r[NUM_BLOCKS + 1] = {0};
     uint32_t l[NUM_BLOCKS + 1] = {0};
 
     generateSubKeys(key,K);
 
     // encode message
 	for (i = 0; i < INT_SIZE64; i++) {
-	_ip |= (uint64_t) (
-		   ((message >> (uint64_t) (MAX_SIZE - IP[i]) ) & 0x1) << (MAX_SIZE - 1 - i)
-           );
+	    _ip |= (uint64_t) (((message >> (uint64_t) (MAX_SIZE - IP[i]) ) & 0x1) << (MAX_SIZE - 1 - i));
 	}
 
     // split permutated message
@@ -48,12 +46,12 @@ uint64_t DES(const uint64_t message,const uint64_t key, const bool decrypt) {
     // rounds
     if (!decrypt) {
         for (i = 1; i <= NUM_BLOCKS; i++) {
-    		l[i] = r[i-1];
-    		r[i] = l[i-1] ^ sBoxPermutation(r[i-1],K[i-1]);
-    	}
+    	    l[i] = r[i-1];
+    	    r[i] = l[i-1] ^ sBoxPermutation(r[i-1],K[i-1]);
+        }
     } else {
-    	for (i = 1; i <= NUM_BLOCKS; i++) {
-    		l[i] = r[i-1];
+        for (i = 1; i <= NUM_BLOCKS; i++) {
+    	    l[i] = r[i-1];
     		r[i] = l[i-1] ^ sBoxPermutation(r[i-1],K[NUM_SUB_KEYS -  i]);
     	}
     }
@@ -66,20 +64,19 @@ uint64_t DES(const uint64_t message,const uint64_t key, const bool decrypt) {
     // inverse permutation
     uint64_t finalPermutation = 0;
     for (j = 0; j < INT_SIZE64; j++)
-    finalPermutation |= ((concatBlocks >>  ((uint64_t) INT_SIZE64 - FP[j])) & 0x1) 
-                        << (uint64_t)(INT_SIZE64 - 1 - j);
+    finalPermutation |= ((concatBlocks >>  ((uint64_t) INT_SIZE64 - FP[j])) & 0x1) << (uint64_t)(INT_SIZE64 - 1 - j);
 	return finalPermutation;
 }
 
 void generateSubKeys(const uint64_t key, uint64_t *subKeys) {
     
     int i,j;
-	uint64_t key_plus = 0;
-	uint32_t _c[NUM_SUB_KEYS+1] = {0};
-	uint32_t _d[NUM_SUB_KEYS+1] = {0};
-	uint64_t _cd[NUM_SUB_KEYS] = {0};
+    uint64_t key_plus = 0;
+    uint32_t _c[NUM_SUB_KEYS+1] = {0};
+    uint32_t _d[NUM_SUB_KEYS+1] = {0};
+    uint64_t _cd[NUM_SUB_KEYS] = {0};
 
-	int shiftSchedule[NUM_SUB_KEYS] = {1,1,2,2,2,2,2,2,1,2,2,2,2,2,2,1};
+    int shiftSchedule[NUM_SUB_KEYS] = {1,1,2,2,2,2,2,2,1,2,2,2,2,2,2,1};
 
 	// load key in big endian and perform PC-1
 	for (i = 0; i < INT_SIZE56; i++) {

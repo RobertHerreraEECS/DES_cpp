@@ -177,14 +177,14 @@ uint32_t sBoxPermutation (const uint32_t block, uint64_t key) {
             case 8:
                 sLookup |= S8[index];
                 break;
-        	default:
-        	    break;
+            default:
+                break;
         }
         sBoxCount++;
     }
 
     // sBox Permutation
-	for (j = 0; j < INT_SIZE32; j++)
-    pOut |= ((sLookup >>  (uint32_t) ((INT_SIZE32) - P[j])) & 0x1)  << (uint32_t)((INT_SIZE32) - 1 -j);
-	return pOut;
+    for (j = 0; j < INT_SIZE32; j++)
+        pOut |= ((sLookup >>  (uint32_t) ((INT_SIZE32) - P[j])) & 0x1)  << (uint32_t)((INT_SIZE32) - 1 -j);
+    return pOut;
 }

@@ -84,8 +84,8 @@ void generateSubKeys(const uint64_t key, uint64_t *subKeys) {
 	}
 
     // seperate permutation into c and d blocks
-	_c[0] = (key_plus>>36);
-	_d[0] = (key_plus>>8);
+    _c[0] = (key_plus>>36);
+    _d[0] = (key_plus>>8);
 
     for (i = 1; i < NUM_SUB_KEYS + 1; i++) {
 

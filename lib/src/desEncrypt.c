@@ -65,7 +65,7 @@ uint64_t DES(const uint64_t message,const uint64_t key, const bool decrypt) {
     uint64_t finalPermutation = 0;
     for (j = 0; j < INT_SIZE64; j++)
     finalPermutation |= ((concatBlocks >>  ((uint64_t) INT_SIZE64 - FP[j])) & 0x1) << (uint64_t)(INT_SIZE64 - 1 - j);
-	return finalPermutation;
+    return finalPermutation;
 }
 
 void generateSubKeys(const uint64_t key, uint64_t *subKeys) {
@@ -78,8 +78,8 @@ void generateSubKeys(const uint64_t key, uint64_t *subKeys) {
 
     int shiftSchedule[NUM_SUB_KEYS] = {1,1,2,2,2,2,2,2,1,2,2,2,2,2,2,1};
 
-	// load key in big endian and perform PC-1
-	for (i = 0; i < INT_SIZE56; i++) {
+    //load key in big endian and perform PC-1
+    for (i = 0; i < INT_SIZE56; i++) {
 		key_plus |= (uint64_t) (((key >> (uint64_t) (MAX_SIZE - PC1[i]) ) & 0x1) << (MAX_SIZE - 1 - i));
 	}
 
@@ -108,23 +108,22 @@ void generateSubKeys(const uint64_t key, uint64_t *subKeys) {
 
     // concatenate blocks
     for (i = 0; i < NUM_SUB_KEYS; i++) {
-	    _cd[i] |= _c[i+1];
-	    _cd[i] = (_cd[i] << 28);
-	    _cd[i] |= _d[i+1];
-	}
+        _cd[i] |= _c[i+1];
+        _cd[i] = (_cd[i] << 28);
+        _cd[i] |= _d[i+1];
+    }
 
     // generate subkeys
-	for (i = 0; i < NUM_SUB_KEYS; i++) {
+    for (i = 0; i < NUM_SUB_KEYS; i++) {
         for (j = 0; j < (INT_SIZE48); j++)
 	    subKeys[i] |= (_cd[i] >> ((INT_SIZE56) - PC2[j]) & 0x1) << ((INT_SIZE48) - j - 1);
-	}
+    }
 }
 
 uint32_t sBoxPermutation (const uint32_t block, uint64_t key) {
-
-	int j;
-	uint32_t pOut = 0;
-	uint64_t _e = 0;
+    int j;
+    uint32_t pOut = 0;
+    uint64_t _e = 0;
 
     // expand right block (E)
     for (j = 0; j < INT_SIZE48; j++)
@@ -140,23 +139,23 @@ uint32_t sBoxPermutation (const uint32_t block, uint64_t key) {
 
         // extract 6 bits at a time from output of e ^ K
         uint8_t sCmpn = (((_e ^ key) >> (count)) << 2) >> 2;
-	    uint8_t row = 0;
-	    uint8_t column = 0;
-	    row = (((sCmpn >> 5) & 1) << 1) | (sCmpn & 1);
-	    column = (sCmpn >> 1) & 0xf;
+        uint8_t row = 0;
+        uint8_t column = 0;
+        row = (((sCmpn >> 5) & 1) << 1) | (sCmpn & 1);
+        column = (sCmpn >> 1) & 0xf;
 
-	    int index = ((NUM_BLOCKS*(row))+(column));
+        int index = ((NUM_BLOCKS*(row))+(column));
         switch(sBoxCount) {
-        	case 1:
+            case 1:
                 sLookup |= S1[index];
                 sLookup = sLookup << 4;
                 break;
             case 2:
-            	sLookup |= S2[index];
+                sLookup |= S2[index];
                 sLookup = sLookup << 4;
-            	break;
+                break;
             case 3:
-            	sLookup |= S3[index];
+                sLookup |= S3[index];
                 sLookup = sLookup << 4;
             	break;
             case 4:

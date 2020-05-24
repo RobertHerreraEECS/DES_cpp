@@ -14,25 +14,6 @@ extern "C"
 	#include "permTables.h"
     
     /**
-    * @brief Encrypt an array of 64 bit data with a 64 bit key
-    * @param message array of 64 bit data
-    * @param len length of the array
-    * @param key 64 bit key
-    * @return ciphertext array encrypted 64 bit data
-    */
-	uint64_t * desEncryptECB(uint64_t *message, int len, uint64_t key);
-
-    /**
-    * @brief Decrypt an array of 64 bit data with a 64 bit key
-    * @param ciphertext array of 64 bit data
-    * @param len the length of the array
-    * @param key 64 bit key
-    * @param plaintext array encrypted 64 bit data
-    * @return uint64_t array of 64 bit ciphertext with 64 bit key
-    */
-	uint64_t * desDecryptECB(uint64_t *ciphertext, int len, uint64_t key);
-
-    /**
     * @brief sBox permutation to be done at each round
     * @param 32 bit block of data to undergo permutation
     * @param key 56 bit key

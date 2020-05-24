@@ -15,32 +15,6 @@ extern "C"
 #define NUM_BLOCKS 16
 #define NUM_SUB_KEYS 16
 
-uint64_t* desEncryptECB(uint64_t *message, int len, uint64_t key){
-#ifdef DEBUG
-	printf("[*] Encrypting Message Using: DES ECB Mode.\n");
-#endif
-	int i;
-	uint64_t *a = (uint64_t *) malloc(sizeof(uint64_t) * len);
-	memset(a,0,sizeof(uint64_t) * len);
-	for (i = 0; i < len; i++) {
-		a[i] = _encrypt(message[i],key);
-	}
-	return a;
-}// end
-
-uint64_t* desDecryptECB(uint64_t *ciphertext, int len,  uint64_t key){
-#ifdef DEBUG
-	printf("[*] Decrypting Message Using: DES ECB Mode.\n");
-#endif
-	int i;
-	uint64_t *a = (uint64_t *) malloc(sizeof(uint64_t) * len);
-	memset(a,0,sizeof(uint64_t) * len);
-	for (i = 0; i < len; i++) {
-		a[i] = _decrypt(ciphertext[i],key);
-	}
-	return a;
-}// end
-
 uint64_t _encrypt(const uint64_t message,const uint64_t key) {
    return DES(message,key,false);
 }
@@ -61,8 +35,8 @@ uint64_t DES(const uint64_t message,const uint64_t key, const bool decrypt) {
     // encode message
 	for (i = 0; i < INT_SIZE64; i++) {
 	_ip |= (uint64_t) (
-		        ((message >> (uint64_t) (MAX_SIZE - IP[i]) ) & 0x1) 
-		        << (MAX_SIZE - 1 - i));
+		   ((message >> (uint64_t) (MAX_SIZE - IP[i]) ) & 0x1) << (MAX_SIZE - 1 - i)
+           );
 	}
 
     // split permutated message
@@ -145,8 +119,7 @@ void generateSubKeys(const uint64_t key, uint64_t *subKeys) {
     // generate subkeys
 	for (i = 0; i < NUM_SUB_KEYS; i++) {
         for (j = 0; j < (INT_SIZE48); j++)
-	    subKeys[i] |= (_cd[i] >> ((INT_SIZE56) - PC2[j]) & 0x1) 
-             << ((INT_SIZE48) - j - 1);
+	    subKeys[i] |= (_cd[i] >> ((INT_SIZE56) - PC2[j]) & 0x1) << ((INT_SIZE48) - j - 1);
 	}
 }
 
@@ -158,8 +131,7 @@ uint32_t sBoxPermutation (const uint32_t block, uint64_t key) {
 
     // expand right block (E)
     for (j = 0; j < INT_SIZE48; j++)
-    _e |= (((uint64_t) (block >>  ((INT_SIZE32) - E[j])) & 0x1) 
-    	    << ((INT_SIZE48) - j - 1));
+    _e |= (((uint64_t) (block >>  ((INT_SIZE32) - E[j])) & 0x1) << ((INT_SIZE48) - j - 1));
 
     // sBox Lookup table
     int count = INT_SIZE48;
@@ -217,7 +189,6 @@ uint32_t sBoxPermutation (const uint32_t block, uint64_t key) {
 
     // sBox Permutation
 	for (j = 0; j < INT_SIZE32; j++)
-    pOut |= ((sLookup >>  (uint32_t) ((INT_SIZE32) - P[j])) & 0x1) 
-          << (uint32_t)((INT_SIZE32) - 1 -j);
+    pOut |= ((sLookup >>  (uint32_t) ((INT_SIZE32) - P[j])) & 0x1)  << (uint32_t)((INT_SIZE32) - 1 -j);
 	return pOut;
 }

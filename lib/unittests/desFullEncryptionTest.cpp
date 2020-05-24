@@ -53,12 +53,12 @@ TEST(singleDecryptTest, singleChunk2) {
 TEST(encryptionTest, test1) {
 
     // Your lips are smoother than vaseline (zero padded)
-    uint64_t a[5] = {0};
-    a[0] = 0x596F7572206C6970;
-    a[1] = 0x732061726520736D; 
-    a[2] = 0x6F6F746865722074; 
-    a[3] = 0x68616E2076617365;
-    a[4] = 0x6C696E650D0A0000;
+    std::vector<uint64_t> a;
+    a.push_back(0x596F7572206C6970);
+    a.push_back(0x732061726520736D);
+    a.push_back(0x6F6F746865722074); 
+    a.push_back(0x68616E2076617365);
+    a.push_back(0x6C696E650D0A0000);
 
     uint64_t key = 0x0E329232EA6D0D73;
 
@@ -69,7 +69,9 @@ TEST(encryptionTest, test1) {
     ciphertext[3] = 0xD9D52F78F5358499; // typo in documentation
     ciphertext[4] = 0x828AC9B453E0E653;
 
-    uint64_t * ctext = ::desEncryptECB(a, 5, key);
+    DesEncryption e;
+    e.setKey(key);
+    std::vector<uint64_t> ctext = e.encryptEcbMode(a);
 
     for (int i = 0; i < 5; i++) {
     	EXPECT_EQ (ctext[i],ciphertext[i]);
@@ -79,26 +81,30 @@ TEST(encryptionTest, test1) {
 TEST(decryptionTest, test1) {
 
     // Your lips are smoother than vaseline (zero padded)
-    uint64_t a[5] = {0};
-    a[0] = 0x596F7572206C6970;
-    a[1] = 0x732061726520736D; 
-    a[2] = 0x6F6F746865722074; 
-    a[3] = 0x68616E2076617365;
-    a[4] = 0x6C696E650D0A0000;
+    std::vector<uint64_t> a;
+    a.push_back(0x596F7572206C6970);
+    a.push_back(0x732061726520736D); 
+    a.push_back(0x6F6F746865722074); 
+    a.push_back(0x68616E2076617365);
+    a.push_back(0x6C696E650D0A0000);
 
     uint64_t key = 0x0E329232EA6D0D73;
 
-    uint64_t ciphertext[5] = {0};
-    ciphertext[0] = 0xC0999FDDE378D7ED;
-    ciphertext[1] = 0x727DA00BCA5A84EE; 
-    ciphertext[2] = 0x47F269A4D6438190; 
-    ciphertext[3] = 0xD9D52F78F5358499; // // typo in documentation
-    ciphertext[4] = 0x828AC9B453E0E653;
+    std::vector<uint64_t> ciphertext;
+    ciphertext.push_back(0xC0999FDDE378D7ED);
+    ciphertext.push_back(0x727DA00BCA5A84EE); 
+    ciphertext.push_back(0x47F269A4D6438190); 
+    ciphertext.push_back(0xD9D52F78F5358499); // typo in documentation
+    ciphertext.push_back(0x828AC9B453E0E653);
 
-    uint64_t * ptext = ::desDecryptECB(ciphertext, 5, key);
+    DesEncryption e;
+    e.setKey(key);
+    std::string ptext = e.decryptEcbMode(ciphertext);
+    std::vector<uint64_t> p = e.getChunks(ptext);
+
 
     for (int i = 0; i < 5; i++) {
-        EXPECT_EQ (ptext[i],  a[i]);
+         EXPECT_EQ (p[i],  a[i]);
     }
 }
 
@@ -109,21 +115,22 @@ TEST(fullEncryptionTest, test1) {
     ciphertext[0] = 0xC0999FDDE378D7ED;
     ciphertext[1] = 0x727DA00BCA5A84EE; 
     ciphertext[2] = 0x47F269A4D6438190; 
-    ciphertext[3] = 0xD9D52F78F5358499; // // typo in documentation
+    ciphertext[3] = 0xD9D52F78F5358499; //typo in documentation
     ciphertext[4] = 0x828AC9B453E0E653;
 
     // TODO: add zero padding
     std::string a = "Your lips are smoother than vaseline\r\n";
 
-    DesEncryption e;
     uint64_t key = 0x0E329232EA6D0D73;
 
-    std::vector<uint64_t> data = e.encryptData(a,key);
+    DesEncryption e;
+    e.setKey(key);
+    std::vector<uint64_t> data = e.encryptEcbMode(a);
 
     int i = 0;
     for (uint64_t c: data) {
-        EXPECT_EQ (c,  ciphertext[i]);
-        i++;
+       EXPECT_EQ (c,  ciphertext[i]);
+       i++;
     }
 
 }
@@ -134,16 +141,17 @@ TEST(fullDecryptionTest, test1) {
     ciphertext.push_back(0xC0999FDDE378D7ED);
     ciphertext.push_back(0x727DA00BCA5A84EE); 
     ciphertext.push_back(0x47F269A4D6438190); 
-    ciphertext.push_back(0xD9D52F78F5358499); // // typo in documentation
+    ciphertext.push_back(0xD9D52F78F5358499); // typo in documentation
     ciphertext.push_back(0x828AC9B453E0E653);
 
     // TODO: add zero padding
     std::string a = "Your lips are smoother than vaseline\r\n";
 
-    DesEncryption e;
-
     uint64_t key = 0x0E329232EA6D0D73;
-    std::string out = e.decryptData(ciphertext,key);
+    DesEncryption e;
+    e.setKey(key);
+
+    std::string out = e.decryptEcbMode(ciphertext);
 
     EXPECT_EQ (out,  a);
 }

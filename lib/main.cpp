@@ -8,11 +8,14 @@
     std::string a = "this text needs to be encrypted and decrypted!!!";
 
     DesEncryption e;
-
     uint64_t key = 0x133457799BBCDFF1;
+    std::vector<uint64_t> data = e.encryptEcbMode(a);
 
-    std::vector<uint64_t> data = e.encryptData(a,key);
-    std::string out = e.decryptData(data,key);
+    for (int64_t c: data) {
+        std::cout << std::hex << c << std::endl;
+    }
+    
+    std::string out = e.decryptEcbMode(data);
 
     std::cout << "message: " << out << std::endl;
 

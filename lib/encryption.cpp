@@ -17,7 +17,59 @@ union Int64_Char {
  };
 
 
-std::vector<uint64_t> DesEncryption::ullFromString(std::string a){
+DesEncryption::DesEncryption() {
+    m_key = 0x133457799BBCDFF1;
+}
+
+DesEncryption::~DesEncryption() {}
+
+uint64_t DesEncryption::getKey() { return m_key; }
+
+void DesEncryption::setKey(uint64_t key) { m_key = key; }
+
+std::string DesEncryption::decryptEcbMode(std::vector<uint64_t> encryptedData) {
+    std::string pText;
+    std::vector<uint64_t> decryptBlocks;
+
+    for (uint64_t block: encryptedData) {
+        decryptBlocks.push_back(_decrypt(block, m_key));
+    }
+
+    for (size_t i = 0; i < decryptBlocks.size(); i++) {
+    	Char_Int64 intData;
+    	intData.data = __builtin_bswap64 (decryptBlocks[i]); // for gcc/clang
+    	std::string s = intData.raw;
+    	pText += s.substr(0,8);
+    }
+    
+    return pText;
+}
+
+std::vector<uint64_t> DesEncryption::encryptEcbMode(std::string a){
+
+    // seperate string into 64 bit blocks (vector)
+    std::vector<uint64_t> dataBlocks = getChunks(a);
+    std::vector<uint64_t> encryptBlocks;
+
+    for (uint64_t block: dataBlocks) {
+        encryptBlocks.push_back(_encrypt(block, m_key));
+    }
+
+    return encryptBlocks;
+}
+
+std::vector<uint64_t> DesEncryption::encryptEcbMode(std::vector<uint64_t> dataBlocks){
+
+    std::vector<uint64_t> encryptBlocks;
+
+    for (uint64_t block: dataBlocks) {
+        encryptBlocks.push_back(_encrypt(block, m_key));
+    }
+
+    return encryptBlocks;
+}
+
+std::vector<uint64_t> DesEncryption::getChunks(const std::string a){
 
     int size = 0;
     int remainder = 0;
@@ -45,36 +97,6 @@ std::vector<uint64_t> DesEncryption::ullFromString(std::string a){
         i+=8;
         j++;
     }
+
     return ullVector;
-}
-
-std::string DesEncryption::decryptData (std::vector<uint64_t> encryptedData, 
-                                        uint64_t key) {
-    std::string out;
-    int len = encryptedData.size();
-    uint64_t *ptext = ::desDecryptECB(encryptedData.data(),len,key);
-
-    for (int i = 0; i < len; i++) {
-    	Char_Int64 intData;
-    	intData.data = __builtin_bswap64 (ptext[i]);
-    	std::string s = intData.raw;
-    	out += s.substr(0,8);
-    }
-    free(ptext);
-    return out;
-}
-
-std::vector<uint64_t> DesEncryption::encryptData (std::string a, uint64_t key){
-
-    std::vector<uint64_t> encryptedData;
-    auto plaintext = ullFromString(a);
-
-	int len = plaintext.size();
-    uint64_t *ciphertext = ::desEncryptECB(plaintext.data(),len,key);
-
-    for (int i = 0; i < len; i++) {
-        encryptedData.push_back(ciphertext[i]);
-    }
-    free(ciphertext);
-    return encryptedData;
 }

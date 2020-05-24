@@ -1,6 +1,6 @@
 # DES Encryption
 
-DES Encryption is a c++ based application that aims to re-work an initial implementation of the DES encryption scheme I did a few years ago. 
+DES Encryption is a c++ based application that aims to re-work an initial implementation of the DES encryption scheme bradosev03 and I did a few years ago. 
 
 
 ## Notes

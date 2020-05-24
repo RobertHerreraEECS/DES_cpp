@@ -7,6 +7,8 @@ extern "C"
 }
 #endif
 
+//TODO: add more macros for hardcoded numbers
+
 #define MAX_SIZE sizeof(uint64_t) * 8
 #define INT_SIZE64 sizeof(uint64_t) * 8
 #define INT_SIZE56 sizeof(uint64_t) * 7
@@ -30,7 +32,7 @@ uint64_t DES(const uint64_t message,const uint64_t key, const bool decrypt) {
 	uint32_t r[NUM_BLOCKS + 1] = {0};
     uint32_t l[NUM_BLOCKS + 1] = {0};
 
-	generateSubKeys(key,K);
+    generateSubKeys(key,K);
 
     // encode message
 	for (i = 0; i < INT_SIZE64; i++) {
@@ -81,9 +83,7 @@ void generateSubKeys(const uint64_t key, uint64_t *subKeys) {
 
 	// load key in big endian and perform PC-1
 	for (i = 0; i < INT_SIZE56; i++) {
-		key_plus |= (uint64_t) (
-		    ((key >> (uint64_t) (MAX_SIZE - PC1[i]) ) & 0x1) 
-		    << (MAX_SIZE - 1 - i));
+		key_plus |= (uint64_t) (((key >> (uint64_t) (MAX_SIZE - PC1[i]) ) & 0x1) << (MAX_SIZE - 1 - i));
 	}
 
     // seperate permutation into c and d blocks

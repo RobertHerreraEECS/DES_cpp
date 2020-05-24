@@ -18,7 +18,7 @@ union Int64_Char {
 
 
 DesEncryption::DesEncryption() {
-    m_key = 0x133457799BBCDFF1;
+    m_key = 0x0;
 }
 
 DesEncryption::~DesEncryption() {}

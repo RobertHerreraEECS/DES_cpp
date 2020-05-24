@@ -21,8 +21,8 @@ class DesEncryption {
 
 public:
 
-	DesEncryption();
-	~DesEncryption();
+    DesEncryption();
+    ~DesEncryption();
 
     /**
     * @brief encrypt string data in 64 bit chunks using ECB Mode

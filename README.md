@@ -25,6 +25,7 @@ DES Encryption is a c++ based application that aims to re-work an initial implem
 * Add more wrapping logic
 * Add encryption via file input
 * Add user interface
+* Add CBC/Counter Modes of Operation
 * <strike> Add unit tests </strike>
 * <strike> Add zero padding </strike>
 

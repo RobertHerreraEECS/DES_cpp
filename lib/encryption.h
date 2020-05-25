@@ -69,6 +69,27 @@ public:
     std::string decryptCbcMode(std::vector<uint64_t> encryptedData);
 
     /**
+    * @brief decrypt 64 bit chunks using OFB Mode (stream cipher)
+    * @param string data to be encrypted
+    * @return plaintext vector in 64 bit chunks
+    */
+    std::vector<uint64_t> encryptOfbMode(std::string a);
+
+    /**
+    * @brief encrypt 64 bit chunks using OFB Mode (stream cipher)
+    * @param string data to be encrypted
+    * @return ciphertext vector in 64 bit chunks
+    */
+    std::vector<uint64_t> encryptOfbMode(std::vector<uint64_t> dataBlocks);
+
+    /**
+    * @brief decrypt 64 bit chunks using OFB Mode
+    * @param string data to be encrypted
+    * @return ciphertext vector in 64 bit chunks
+    */
+    std::string decryptOfbMode(std::vector<uint64_t> encryptedData);
+
+    /**
     * @brief function will convert a string to  a vector of uint64's (unsigned long long)
     * @param string data to be converted to uint64 vector
     * @return plaintext vector in 64 bit chunks

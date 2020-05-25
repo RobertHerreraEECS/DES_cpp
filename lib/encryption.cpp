@@ -32,6 +32,25 @@ uint64_t DesEncryption::getKey() { return m_key; }
 
 void DesEncryption::setKey(uint64_t key) { m_key = key; }
 
+
+std::vector<uint64_t> DesEncryption::encryptEcbMode(std::string a){
+
+    // seperate string into 64 bit blocks (vector)
+    std::vector<uint64_t> dataBlocks = getChunks(a);
+    return encryptEcbMode(dataBlocks);
+}
+
+std::vector<uint64_t> DesEncryption::encryptEcbMode(std::vector<uint64_t> dataBlocks){
+
+    std::vector<uint64_t> encryptBlocks;
+
+    for (uint64_t block: dataBlocks) {
+        encryptBlocks.push_back(_encrypt(block, m_key));
+    }
+
+    return encryptBlocks;
+}
+
 std::string DesEncryption::decryptEcbMode(std::vector<uint64_t> encryptedData) {
     std::string pText;
     std::vector<uint64_t> decryptBlocks;
@@ -50,44 +69,10 @@ std::string DesEncryption::decryptEcbMode(std::vector<uint64_t> encryptedData) {
     return pText;
 }
 
-std::vector<uint64_t> DesEncryption::encryptEcbMode(std::string a){
-
-    // seperate string into 64 bit blocks (vector)
-    std::vector<uint64_t> dataBlocks = getChunks(a);
-    std::vector<uint64_t> encryptBlocks;
-
-    for (uint64_t block: dataBlocks) {
-        encryptBlocks.push_back(_encrypt(block, m_key));
-    }
-
-    return encryptBlocks;
-}
-
-std::vector<uint64_t> DesEncryption::encryptEcbMode(std::vector<uint64_t> dataBlocks){
-
-    std::vector<uint64_t> encryptBlocks;
-
-    for (uint64_t block: dataBlocks) {
-        encryptBlocks.push_back(_encrypt(block, m_key));
-    }
-
-    return encryptBlocks;
-}
-
 std::vector<uint64_t> DesEncryption::encryptCbcMode(std::string a){
-    std::vector<uint64_t> encryptBlocks;
 
     std::vector<uint64_t> dataBlocks = getChunks(a);
-    for (size_t i = 0; i < dataBlocks.size(); i++) {
-
-        if (i == 0) {
-            encryptBlocks.push_back(_encrypt((dataBlocks[i] ^ m_iv), m_key));
-        } else {
-            encryptBlocks.push_back(_encrypt((dataBlocks[i] ^ encryptBlocks[i-1]), m_key));
-        }
-    }
-
-    return encryptBlocks;
+    return encryptCbcMode(dataBlocks);
 }
 
 std::vector<uint64_t> DesEncryption::encryptCbcMode(std::vector<uint64_t> dataBlocks) {
@@ -127,6 +112,55 @@ std::string DesEncryption::decryptCbcMode(std::vector<uint64_t> encryptedData) {
     }
     
     return pText;
+}
+
+
+std::vector<uint64_t> DesEncryption::encryptOfbMode(std::string a) {
+    std::vector<uint64_t> dataBlocks = getChunks(a);
+    return encryptOfbMode(dataBlocks);
+}
+
+std::vector<uint64_t> DesEncryption::encryptOfbMode(std::vector<uint64_t> dataBlocks) {
+    std::vector<uint64_t> encryptBlocks;
+    std::vector<uint64_t> streamBlocks;
+
+    for (size_t i = 0; i < dataBlocks.size(); i++) {
+
+        if (i == 0) {
+            streamBlocks.push_back(_encrypt(m_iv, m_key));
+        } else {
+            streamBlocks.push_back(_encrypt(streamBlocks[i-1], m_key));
+        }
+        encryptBlocks.push_back(streamBlocks[i] ^ dataBlocks[i]);
+
+    }
+
+    return encryptBlocks;
+}
+
+std::string DesEncryption::decryptOfbMode(std::vector<uint64_t> encryptedData) {
+    std::vector<uint64_t> decryptBlocks;
+    std::vector<uint64_t> streamBlocks;
+    std::string pText;
+
+    for (size_t i = 0; i < encryptedData.size(); i++) {
+        if (i == 0) {
+            streamBlocks.push_back(_encrypt(m_iv, m_key));
+        } else {
+            streamBlocks.push_back(_encrypt(streamBlocks[i-1], m_key));
+        }
+        decryptBlocks.push_back(streamBlocks[i] ^ encryptedData[i]);
+    }
+
+    for (size_t i = 0; i < decryptBlocks.size(); i++) {
+    	Char_Int64 intData;
+    	intData.data = __builtin_bswap64(decryptBlocks[i]);
+    	std::string s = intData.raw;
+    	pText += s.substr(0,8);
+    }
+    
+    return pText;
+
 }
 
 

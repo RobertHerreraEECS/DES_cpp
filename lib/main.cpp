@@ -11,9 +11,6 @@ int main(int argc, char *argv[]){
 
     DesEncryption e;
     e.setKey((uint64_t) 0x133457799BBCDFF1);
-    e.initializeIV();
-    cout << hex << e.getIV() << endl;
-
 
     cout << "ECB Mode:" << endl;
     vector<uint64_t> d = e.encryptEcbMode(a);
@@ -24,12 +21,22 @@ int main(int argc, char *argv[]){
     cout << "message: " << ptext << endl;
 
     cout << "CBC Mode:" << endl;
+    e.initializeIV();
     vector<uint64_t> data = e.encryptCbcMode(a);
     for (uint64_t c: data)
     cout << hex << c << endl;
 
     string out = e.decryptCbcMode(data);
     cout << "message: " << out << endl;
+
+
+    cout << "OFB Mode:" << endl;
+    vector<uint64_t> ctxt = e.encryptOfbMode(a);
+    for (uint64_t c: ctxt)
+    cout << hex << c << endl;
+
+    string ptxt = e.decryptOfbMode(ctxt);
+    cout << "message: " << ptxt << endl;
 
     return 0;
  }

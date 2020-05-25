@@ -77,13 +77,14 @@ std::vector<uint64_t> DesEncryption::encryptEcbMode(std::vector<uint64_t> dataBl
 std::vector<uint64_t> DesEncryption::encryptCbcMode(std::string a){
     std::vector<uint64_t> encryptBlocks;
 
-    uint64_t ivCipher = _encrypt(m_iv, m_key);
-
     std::vector<uint64_t> dataBlocks = getChunks(a);
+    for (size_t i = 0; i < dataBlocks.size(); i++) {
 
-    // xor plaintext blocks with encrypted IV 
-    for (uint64_t block: dataBlocks) {
-        encryptBlocks.push_back( block ^ ivCipher );
+        if (i == 0) {
+            encryptBlocks.push_back(_encrypt((dataBlocks[i] ^ m_iv), m_key));
+        } else {
+            encryptBlocks.push_back(_encrypt((dataBlocks[i] ^ encryptBlocks[i-1]), m_key));
+        }
     }
 
     return encryptBlocks;
@@ -92,11 +93,13 @@ std::vector<uint64_t> DesEncryption::encryptCbcMode(std::string a){
 std::vector<uint64_t> DesEncryption::encryptCbcMode(std::vector<uint64_t> dataBlocks) {
     std::vector<uint64_t> encryptBlocks;
 
-    uint64_t ivCipher = _encrypt(m_iv, m_key);
+    for (size_t i = 0; i < dataBlocks.size(); i++) {
 
-    // xor plaintext blocks with encrypted IV 
-    for (uint64_t block: dataBlocks) {
-        encryptBlocks.push_back( block ^ ivCipher );
+        if (i == 0) {
+            encryptBlocks.push_back(_encrypt((dataBlocks[i] ^ m_iv), m_key));
+        } else {
+            encryptBlocks.push_back(_encrypt((dataBlocks[i] ^ encryptBlocks[i-1]), m_key));
+        }
     }
 
     return encryptBlocks;
@@ -106,13 +109,15 @@ std::string DesEncryption::decryptCbcMode(std::vector<uint64_t> encryptedData) {
     std::string pText;
     std::vector<uint64_t> decryptBlocks;
 
-    uint64_t ivCipher = _encrypt(m_iv, m_key);
 
-    // xor ciphertext blocks with encrypted IV 
-    for (uint64_t block: encryptedData) {
-        decryptBlocks.push_back( block ^ ivCipher );
+    for (size_t i = 0; i < encryptedData.size(); i++) {
+
+        if (i == 0) {
+            decryptBlocks.push_back(_decrypt(encryptedData[i], m_key) ^ m_iv);
+        } else {
+            decryptBlocks.push_back(_decrypt(encryptedData[i], m_key) ^ encryptedData[i-1]);
+        }
     }
-
 
     for (size_t i = 0; i < decryptBlocks.size(); i++) {
     	Char_Int64 intData;
@@ -166,6 +171,6 @@ uint64_t DesEncryption::getIV() { return m_iv; }
 
 uint64_t DesEncryption::getRandomValue() {
     //TODO: this will do for now
-    std::uniform_int_distribution<uint64_t> dis(977, 5849);
+    std::uniform_int_distribution<uint64_t> dis(0xa4c8e71b4bad4abf, 0xa4c8e71b4bad4abf);
     return dis(m_gen);
 }

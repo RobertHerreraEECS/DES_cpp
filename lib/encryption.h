@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <cstdlib>
+#include <cstdint>
 #include <random>
 
 #ifdef __cplusplus

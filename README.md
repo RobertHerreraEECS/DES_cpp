@@ -23,9 +23,11 @@ DES Encryption is a c++ based application that aims to re-work an initial implem
 ## TODO
 * <strike> Fix cmake RPATH issue with shared libraries </strike>
 * Add more wrapping logic
+** Improve random number generation
 * Add encryption via file input
-* Add user interface
-* Add CBC/Counter Modes of Operation
+* Add user interface to main
+* Add ICBC - Interleaved CBC Mode
+* <strike> Add CBC/Counter Modes of Operation </strike>
 * <strike> Add unit tests </strike>
 * <strike> Add zero padding </strike>
 

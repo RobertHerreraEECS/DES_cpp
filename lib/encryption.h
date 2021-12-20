@@ -19,83 +19,34 @@ extern "C"
 
 
 // DES Cipher Wrapper Class
-class DesEncryption {
+class CryptoDES {
 
 public:
 
-    DesEncryption();
-    ~DesEncryption();
+    CryptoDES();
+    ~CryptoDES();
 
     /**
-    * @brief encrypt string data in 64 bit chunks using ECB Mode
-    * @param string data to be encrypted
-    * @return ciphertext vector in 64 bit chunks
-    */
-    std::vector<uint64_t>  encryptEcbMode(std::string);
+     *  @brief encrypt data in place using DES cipher
+     *  in ECB Mode.
+     *  @param message input plaintext to be encrypted
+     *  @param size the size of the input plaintext
+     *  @key the key used to encrypt data. This key is to
+     *  be 8 bytes in length. If longer than 8 bytes, only
+     *  the first 8 are copied and used.
+     **/
+    void encryptECB(char *message, size_t size, const char *key);
 
     /**
-    * @brief encrypt 64 bit chunks using ECB Mode
-    * @param 64 bit chunks to be encrypted
-    * @return ciphertext vector in 64 bit chunks
-    */
-    std::vector<uint64_t> encryptEcbMode(std::vector<uint64_t> dataBlocks);
-
-
-    /**
-    * @brief decrypt uint64 vector data using ECB Mode
-    * @param vector uint64 vector representing ciphertext
-    * @return plaintext in string datatype
-    */
-    std::string decryptEcbMode(std::vector<uint64_t>);
-
-    /**
-    * @brief encrypt string data in 64 bit chunks using CBC Mode
-    * @param string data to be encrypted
-    * @return ciphertext vector in 64 bit chunks
-    */
-    std::vector<uint64_t> encryptCbcMode(std::string a);
-
-    /**
-    * @brief encrypt 64 bit chunks using CBC Mode
-    * @param string data to be encrypted
-    * @return ciphertext vector in 64 bit chunks
-    */
-    std::vector<uint64_t> encryptCbcMode(std::vector<uint64_t> dataBlocks);
-
-    /**
-    * @brief decrypt 64 bit chunks using CBC Mode
-    * @param string data to be encrypted
-    * @return plaintext vector in 64 bit chunks
-    */
-    std::string decryptCbcMode(std::vector<uint64_t> encryptedData);
-
-    /**
-    * @brief decrypt 64 bit chunks using OFB Mode (stream cipher)
-    * @param string data to be encrypted
-    * @return plaintext vector in 64 bit chunks
-    */
-    std::vector<uint64_t> encryptOfbMode(std::string a);
-
-    /**
-    * @brief encrypt 64 bit chunks using OFB Mode (stream cipher)
-    * @param string data to be encrypted
-    * @return ciphertext vector in 64 bit chunks
-    */
-    std::vector<uint64_t> encryptOfbMode(std::vector<uint64_t> dataBlocks);
-
-    /**
-    * @brief decrypt 64 bit chunks using OFB Mode
-    * @param string data to be encrypted
-    * @return ciphertext vector in 64 bit chunks
-    */
-    std::string decryptOfbMode(std::vector<uint64_t> encryptedData);
-
-    /**
-    * @brief function will convert a string to  a vector of uint64's (unsigned long long)
-    * @param string data to be converted to uint64 vector
-    * @return plaintext vector in 64 bit chunks
-    */
-    std::vector<uint64_t> getChunks(const std::string);
+     *  @brief decrypt data in place using DES cipher
+     *  in ECB Mode.
+     *  @param message input plaintext to be encrypted
+     *  @param size the size of the input plaintext
+     *  @key the key used to encrypt data. This key is to
+     *  be 8 bytes in length. If longer than 8 bytes, only
+     *  the first 8 are copied and used.
+     **/
+    void decryptECB(char *ciphertext, size_t size, const char *key);
 
     /**
     * @brief get key currently loaded

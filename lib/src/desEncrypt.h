@@ -1,58 +1,92 @@
 #ifndef DES_ENCRYPT_H
 #define DES_ENCRYPT_H
 
+#include <inttypes.h>
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-	#include <stdio.h>
-    #include <stdint.h>
-	#include <stdlib.h>
-	#include <stdbool.h>
-	#include <string.h>
+#define MAX_SIZE sizeof(uint64_t) * 8
+#define INT_SIZE64 sizeof(uint64_t) * 8
+#define INT_SIZE56 sizeof(uint64_t) * 7
+#define INT_SIZE48 sizeof(uint64_t) * 6
+#define INT_SIZE32 sizeof(uint64_t) * 4
+#define NUM_BLOCKS 16
+#define NUM_SUB_KEYS 16
+#define KEY_BYTES 8
 
-	#include "permTables.h"
-    
-    /**
-    * @brief sBox permutation to be done at each round
-    * @param 32 bit block of data to undergo permutation
-    * @param key 56 bit key
-    * @return uint32_t sbox permutation for a given subkey
-    */
-	uint32_t sBoxPermutation (const uint32_t block, uint64_t key);
 
-    /**
-    * @brief generate 16 56-bit sub keys
-    * @param key 56 bit key
-    * @param array of 56 bit sub keys
-    */
-	void generateSubKeys(const uint64_t key, uint64_t *subKeys);
+/**
+* @brief Populating this context is recommeded
+* when encrypting/decrypting. It allows the
+* all cipher metadata to located in one place
+* for easy sanitization.
+*
+* The CryptDES function performs in place
+* encryption/decryption so make sure to 
+* pass in non-readonly data.
+*/
+typedef struct context {
+    char key[8];
+    char *message;
+    int messageSize;
+    uint64_t subkeys[NUM_SUB_KEYS];
+} DESCtx;
 
-    /**
-    * @brief Encrypt an array of 64 bit data
-    * @param message of 64 bit data
-    * @param key 64 bit key
-    * @return uint64_t 64 bit ciphertext
-    */
-	uint64_t _encrypt(const uint64_t message,const uint64_t key);
 
-   /**
-    * @brief Decrypt an array of 64 bit data
-    * @param ciphertext of 64 bit data
-    * @param key 64 bit key
-    * @return uint64_t 64 bit plaintext
-    */
-	uint64_t _decrypt(const uint64_t message,const uint64_t key);
+/**
+* @brief Populating this context is recommeded
+* when encrypting/decrypting. It allows the
+* all cipher metadata to located in one place
+* for easy sanitization.
+*/
+typedef enum ctx_type {
+    EncryptT,
+    DecryptT,
+} CtxType;
 
-    /**
-    * @brief Encrypt an array of 64 bit data with a 64 bit key
-    * @param message array of 64 bit data (either plain or cipertext)
-    * @param key 64 bit key
-    * @param decrypt bool specifying the order that the subkeys are applied
-    * @return uint64_t array of 64 bit ciphertext with 64 bit key
-    */
-	uint64_t DES(const uint64_t message, const uint64_t key, const bool decrypt);
+/**
+* @brief Initialize the DES context by expanding 
+* @param ctx DES Context
+*/
+void initialize(DESCtx *ctx);
+
+/**
+* @brief finalize DES context
+* @return uint32_t sbox permutation for a given subkey
+*/
+void finalize(DESCtx *ctx, CtxType type);
+
+
+/**
+* @brief destroy context info
+*/
+void sanitize(DESCtx *ctx);
+
+/**
+* @brief sBox permutation to be done at each round
+* @param 32 bit block of data to undergo permutation
+* @param key 56 bit key
+* @return uint32_t sbox permutation for a given subkey
+*/
+uint32_t sBoxPermutation (const uint32_t block, uint64_t key);
+
+/**
+* @brief generate 16 56-bit sub keys
+* @param key 56 bit key
+* @param array of 56 bit sub keys
+*/
+void generateKeySchedule(const uint64_t key, uint64_t *subKeys);
+
+/**
+* @brief DES Cipher with encrypt/decrypt option
+* @param message plaintext or ciphertext
+* @param subkeys key schedule for the specified cipher key.
+* @param decrypt boolean specifying if decrypt mode is enabled.
+*/
+void CryptDES(uint64_t *message,uint64_t *subkeys, bool decrypt);
 
 #ifdef __cplusplus 
 }

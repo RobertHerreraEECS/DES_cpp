@@ -1,42 +1,48 @@
 #include <iostream>
+#include <fstream>
 #include <string>
 #include "encryption.h"
+//#include "desEncrypt.h"
 
 using namespace std;
 
+typedef struct {
+    string hexlifiedKey;
+    string filename;
+    char *data;
+} UserInfo;
+
+
+void unhexlify(char *data) {
+
+}
+
+string hexlify(char *data, size_t size){
+    return string("DEADBEEF");
+}
+
+void parseArgs(int argc, char *argv[]) {
+
+}
+
+void usage() {
+    cout << "usage:" << endl;
+    cout << "./main <input_file>" << endl;
+}
+
 int main(int argc, char *argv[]){
-    cout << "=== DES Encryption Program ===" << endl;
 
+    if (argc < 2) {
+        usage();
+        exit(-1);
+    }
+
+    parseArgs(argc, argv);
+
+    CryptoDES desCryptCtx;
+    const uint8_t key[8] = { 0xde, 0xad, 0xbe, 0xef, 0xfa, 0xce, 0xfa, 0xde };
     string a = "this text needs to be encrypted and decrypted!!!";
-
-    DesEncryption e;
-    e.setKey((uint64_t) 0x133457799BBCDFF1);
-
-    cout << "ECB Mode:" << endl;
-    vector<uint64_t> d = e.encryptEcbMode(a);
-    for (uint64_t c: d)
-    cout << hex << c << endl;
-
-    string ptext = e.decryptEcbMode(d);
-    cout << "message: " << ptext << endl;
-
-    cout << "CBC Mode:" << endl;
-    e.initializeIV();
-    vector<uint64_t> data = e.encryptCbcMode(a);
-    for (uint64_t c: data)
-    cout << hex << c << endl;
-
-    string out = e.decryptCbcMode(data);
-    cout << "message: " << out << endl;
-
-
-    cout << "OFB Mode:" << endl;
-    vector<uint64_t> ctxt = e.encryptOfbMode(a);
-    for (uint64_t c: ctxt)
-    cout << hex << c << endl;
-
-    string ptxt = e.decryptOfbMode(ctxt);
-    cout << "message: " << ptxt << endl;
+    char* c = const_cast<char*>(a.c_str());
 
     return 0;
  }

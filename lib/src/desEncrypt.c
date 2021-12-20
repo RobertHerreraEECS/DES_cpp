@@ -2,44 +2,111 @@
 extern "C"
 {
 #endif
-	#include "desEncrypt.h"
-#ifdef __cplusplus
-}
+
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <string.h>
+#include "permTables.h"
+#include "desEncrypt.h"
+
+#if defined(_WIN32) || defined(_WIN64)
+
+#elif defined (__linux__)
+#include <byteswap.h>
+#elif defined (__MACH__) || defined (__unix__)
+
 #endif
 
-//TODO: add more macros for hardcoded numbers
 
-#define MAX_SIZE sizeof(uint64_t) * 8
-#define INT_SIZE64 sizeof(uint64_t) * 8
-#define INT_SIZE56 sizeof(uint64_t) * 7
-#define INT_SIZE48 sizeof(uint64_t) * 6
-#define INT_SIZE32 sizeof(uint64_t) * 4
-#define NUM_BLOCKS 16
-#define NUM_SUB_KEYS 16
+void initialize(DESCtx *ctx) {
 
-uint64_t _encrypt(const uint64_t message,const uint64_t key) {
-   return DES(message,key,false);
+    memset(ctx->subkeys, 0, sizeof(uint64_t) * NUM_SUB_KEYS);
+
+    // generate key schedule
+    generateKeySchedule(*((uint64_t *) ctx->key), ctx->subkeys);
 }
 
-uint64_t _decrypt(const uint64_t message,const uint64_t key) {
-    return DES(message,key,true);
+void finalize(DESCtx *ctx, CtxType type) {
+    bool cryptType = false;
+    int numBlocks, i = 0;
+    uint64_t *dataPtr = NULL;
+
+    if (type == DecryptT)
+        cryptType = true;
+
+    dataPtr = (uint64_t *) (ctx->message);
+
+    // iterate over number of blocks,
+    // and pad to the neareset block size
+    numBlocks = (ctx->messageSize / 8);
+    if (ctx->messageSize % 8 > 0)
+        numBlocks += 1;
+    
+    for (i = 0; i < numBlocks; i++) {
+
+
+        if (type == EncryptT) {
+            #if defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN || \
+            defined(__LITTLE_ENDIAN__) || \
+            defined(__ARMEL__) || \
+            defined(__THUMBEL__) || \
+            defined(__AARCH64EL__) || \
+            defined(_MIPSEL) || defined(__MIPSEL) || defined(__MIPSEL__)
+            #if defined(_WIN32) || defined(_WIN64)
+            *dataPtr = _byteswap_uint64(*dataPtr);
+            #elif defined (__linux__)
+            *dataPtr = bswap_64(*dataPtr);
+            #elif defined (__MACH__) || defined (__unix__)
+            *dataPtr = __builtin_bswap64(*dataPtr);
+            #endif
+            #endif
+        }
+
+        CryptDES(dataPtr, ctx->subkeys, cryptType);
+
+        if (type == DecryptT) {
+            #if defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN || \
+            defined(__LITTLE_ENDIAN__) || \
+            defined(__ARMEL__) || \
+            defined(__THUMBEL__) || \
+            defined(__AARCH64EL__) || \
+            defined(_MIPSEL) || defined(__MIPSEL) || defined(__MIPSEL__)
+            #if defined(_WIN32) || defined(_WIN64)
+            *dataPtr = _byteswap_uint64(*dataPtr);
+            #elif defined (__linux__)
+            *dataPtr = bswap_64(*dataPtr);
+            #elif defined (__MACH__) || defined (__unix__)
+            *dataPtr = __builtin_bswap64(*dataPtr);
+            #endif
+            #endif
+        }
+
+        dataPtr++;
+    }
 }
 
-uint64_t DES(const uint64_t message,const uint64_t key, const bool decrypt) {
+void sanitize(DESCtx *ctx) {
+    memset(ctx, 0, sizeof(DESCtx));
+}
+
+void CryptDES(uint64_t *message,uint64_t *subkeys, bool decrypt) {
     int i,j,k;
     uint64_t _ip = 0;
-    uint64_t K[NUM_SUB_KEYS] = {0};
+    uint64_t finalPermutation = 0;
+    uint64_t concatBlocks = 0;
     uint32_t r[NUM_BLOCKS + 1] = {0};
     uint32_t l[NUM_BLOCKS + 1] = {0};
 
-    generateSubKeys(key,K);
 
-    // encode message
-	for (i = 0; i < INT_SIZE64; i++) {
-	    _ip |= (uint64_t) (((message >> (uint64_t) (MAX_SIZE - IP[i]) ) & 0x1) << (MAX_SIZE - 1 - i));
-	}
+    // encode with intial permutation
+    for (i = 0; i < INT_SIZE64; i++) {
+        _ip |= (uint64_t) (((*message >> (uint64_t) (MAX_SIZE - IP[i]) ) & 0x1) << (MAX_SIZE - 1 - i));
+    }
 
-    // split permutated message
+    // split permutated message into
+    // right and left blocks
     r[0] |= _ip;
     l[0] = _ip >> ((INT_SIZE64) / 2);
 
@@ -47,28 +114,26 @@ uint64_t DES(const uint64_t message,const uint64_t key, const bool decrypt) {
     if (!decrypt) {
         for (i = 1; i <= NUM_BLOCKS; i++) {
     	    l[i] = r[i-1];
-    	    r[i] = l[i-1] ^ sBoxPermutation(r[i-1],K[i-1]);
+    	    r[i] = l[i-1] ^ sBoxPermutation(r[i-1],subkeys[i-1]);
         }
     } else {
         for (i = 1; i <= NUM_BLOCKS; i++) {
     	    l[i] = r[i-1];
-    		r[i] = l[i-1] ^ sBoxPermutation(r[i-1],K[NUM_SUB_KEYS -  i]);
+    	    r[i] = l[i-1] ^ sBoxPermutation(r[i-1],subkeys[NUM_SUB_KEYS -  i]);
     	}
     }
 
-    uint64_t concatBlocks = 0;
     concatBlocks |= r[16];
     concatBlocks = concatBlocks << ((INT_SIZE64) / 2);
     concatBlocks |= l[16];
 
-    // inverse permutation
-    uint64_t finalPermutation = 0;
+    // final inverse permutation
     for (j = 0; j < INT_SIZE64; j++)
     finalPermutation |= ((concatBlocks >>  ((uint64_t) INT_SIZE64 - FP[j])) & 0x1) << (uint64_t)(INT_SIZE64 - 1 - j);
-    return finalPermutation;
+    *message = finalPermutation;
 }
 
-void generateSubKeys(const uint64_t key, uint64_t *subKeys) {
+void generateKeySchedule(const uint64_t key, uint64_t *subKeys) {
     
     int i,j;
     uint64_t key_plus = 0;
@@ -88,7 +153,7 @@ void generateSubKeys(const uint64_t key, uint64_t *subKeys) {
     _d[0] = (key_plus>>8);
 
     for (i = 1; i < NUM_SUB_KEYS + 1; i++) {
-
+    
         uint32_t temp = _d[i-1];
         for (j = 1; j <= shiftSchedule[i-1]; j++) {
             _d[i] = (temp << 1) | (1 & (temp >> 27));
@@ -144,7 +209,10 @@ uint32_t sBoxPermutation (const uint32_t block, uint64_t key) {
         row = (((sCmpn >> 5) & 1) << 1) | (sCmpn & 1);
         column = (sCmpn >> 1) & 0xf;
 
-        int index = ((NUM_BLOCKS*(row))+(column));
+        int index = (NUM_BLOCKS*row + column);
+
+	// TODO: eliminate this lookup and optimize
+	// to branchless lookup
         switch(sBoxCount) {
             case 1:
                 sLookup |= S1[index];
@@ -188,3 +256,7 @@ uint32_t sBoxPermutation (const uint32_t block, uint64_t key) {
         pOut |= ((sLookup >>  (uint32_t) ((INT_SIZE32) - P[j])) & 0x1)  << (uint32_t)((INT_SIZE32) - 1 -j);
     return pOut;
 }
+
+#ifdef __cplusplus
+}
+#endif

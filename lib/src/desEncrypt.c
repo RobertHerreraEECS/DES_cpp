@@ -43,7 +43,7 @@ void finalize(DESCtx *ctx, CtxType type) {
     numBlocks = (ctx->messageSize / 8);
     if (ctx->messageSize % 8 > 0)
         numBlocks += 1;
-    
+
     for (i = 0; i < numBlocks; i++) {
 
 

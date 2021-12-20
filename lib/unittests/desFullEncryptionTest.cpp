@@ -89,7 +89,7 @@ TEST(singleDecryptTest, singleChunk2) {
 TEST(encryptionTest, test1) {
 
     // Your lips are smoother than vaseline (zero padded)
-    char message[] = "Your lips are smoother than vaseline";
+    char message[] = "Your lips are smoother than vaseline\r\n";
     uint64_t *ref = NULL;
     uint64_t key = 0x0E329232EA6D0D73;
     uint64_t ciphertext[5] = {0};
@@ -97,6 +97,7 @@ TEST(encryptionTest, test1) {
 
     memcpy(ctx.key, (char *) &key, KEY_BYTES);
     ctx.message = (char *) &message;
+
     ctx.messageSize = strlen(message);
 
     initialize(&ctx);
@@ -110,8 +111,7 @@ TEST(encryptionTest, test1) {
 
     ref = (uint64_t *) &message;
     for (int i = 0; i < 5; i++) {
-        //EXPECT_EQ (ciphertext[i], *ref++);
-	    printf("%lx\n", *ref++);
+        EXPECT_EQ (ciphertext[i], *ref++);
     }
 }
 
@@ -119,27 +119,33 @@ TEST(encryptionTest, test1) {
 TEST(decryptionTest, test1) {
 
     // Your lips are smoother than vaseline (zero padded)
-    std::vector<uint64_t> a;
-    a.push_back(0x596F7572206C6970);
-    a.push_back(0x732061726520736D); 
-    a.push_back(0x6F6F746865722074); 
-    a.push_back(0x68616E2076617365);
-    a.push_back(0x6C696E650D0A0000);
-
+    char message[] = "Your lips are smoother than vaseline\r\n";
+    uint64_t *ref = NULL;
     uint64_t key = 0x0E329232EA6D0D73;
+    uint64_t a[5];
+    uint64_t ciphertext[5];
+    DESCtx ctx;
 
-    std::vector<uint64_t> ciphertext;
-    ciphertext.push_back(0xC0999FDDE378D7ED);
-    ciphertext.push_back(0x727DA00BCA5A84EE); 
-    ciphertext.push_back(0x47F269A4D6438190); 
-    ciphertext.push_back(0xD9D52F78F5358499); // typo in documentation
-    ciphertext.push_back(0x828AC9B453E0E653);
+    a[0] = 0x596F7572206C6970;
+    a[1] = 0x732061726520736D; 
+    a[2] = 0x6F6F746865722074; 
+    a[3] = 0x68616E2076617365;
+    a[4] = 0x6C696E650D0A0000;
 
-    CryptoDES e;
-    e.setKey(key);
-    std::string ptext = e.decryptEcbMode(ciphertext);
-    std::vector<uint64_t> p = e.getChunks(ptext);
+    ciphertext[0] = 0xC0999FDDE378D7ED;
+    ciphertext[1] = 0x727DA00BCA5A84EE; 
+    ciphertext[2] = 0x47F269A4D6438190; 
+    ciphertext[3] = 0xD9D52F78F5358499; // typo in documentation
+    ciphertext[4] = 0x828AC9B453E0E653;
 
+    memcpy(ctx.key, (char *) &key, KEY_BYTES);
+    ctx.message = (char *) &message;
+
+    ctx.messageSize = strlen(message);
+    // TODO: need to do a ciphertext size
+
+    initialize(&ctx);
+    finalize(&ctx, EncryptT);
 
     for (int i = 0; i < 5; i++) {
          EXPECT_EQ (p[i],  a[i]);

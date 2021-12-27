@@ -47,41 +47,38 @@ void finalize(DESCtx *ctx, CtxType type) {
     for (i = 0; i < numBlocks; i++) {
 
 
-        if (type == EncryptT) {
-            #if defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN || \
-            defined(__LITTLE_ENDIAN__) || \
-            defined(__ARMEL__) || \
-            defined(__THUMBEL__) || \
-            defined(__AARCH64EL__) || \
-            defined(_MIPSEL) || defined(__MIPSEL) || defined(__MIPSEL__)
-            #if defined(_WIN32) || defined(_WIN64)
-            *dataPtr = _byteswap_uint64(*dataPtr);
-            #elif defined (__linux__)
-            *dataPtr = bswap_64(*dataPtr);
-            #elif defined (__MACH__) || defined (__unix__)
-            *dataPtr = __builtin_bswap64(*dataPtr);
-            #endif
-            #endif
-        }
+        #if defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN || \
+        defined(__LITTLE_ENDIAN__) || \
+        defined(__ARMEL__) || \
+        defined(__THUMBEL__) || \
+        defined(__AARCH64EL__) || \
+        defined(_MIPSEL) || defined(__MIPSEL) || defined(__MIPSEL__)
+        #if defined(_WIN32) || defined(_WIN64)
+        *dataPtr = _byteswap_uint64(*dataPtr);
+        #elif defined (__linux__)
+        *dataPtr = bswap_64(*dataPtr);
+        #elif defined (__MACH__) || defined (__unix__)
+        *dataPtr = __builtin_bswap64(*dataPtr);
+        #endif
+        #endif
 
         CryptDES(dataPtr, ctx->subkeys, cryptType);
 
-        if (type == DecryptT) {
-            #if defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN || \
-            defined(__LITTLE_ENDIAN__) || \
-            defined(__ARMEL__) || \
-            defined(__THUMBEL__) || \
-            defined(__AARCH64EL__) || \
-            defined(_MIPSEL) || defined(__MIPSEL) || defined(__MIPSEL__)
-            #if defined(_WIN32) || defined(_WIN64)
-            *dataPtr = _byteswap_uint64(*dataPtr);
-            #elif defined (__linux__)
-            *dataPtr = bswap_64(*dataPtr);
-            #elif defined (__MACH__) || defined (__unix__)
-            *dataPtr = __builtin_bswap64(*dataPtr);
-            #endif
-            #endif
-        }
+
+        #if defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN || \
+        defined(__LITTLE_ENDIAN__) || \
+        defined(__ARMEL__) || \
+        defined(__THUMBEL__) || \
+        defined(__AARCH64EL__) || \
+        defined(_MIPSEL) || defined(__MIPSEL) || defined(__MIPSEL__)
+        #if defined(_WIN32) || defined(_WIN64)
+        *dataPtr = _byteswap_uint64(*dataPtr);
+        #elif defined (__linux__)
+        *dataPtr = bswap_64(*dataPtr);
+        #elif defined (__MACH__) || defined (__unix__)
+        *dataPtr = __builtin_bswap64(*dataPtr);
+        #endif
+        #endif
 
         dataPtr++;
     }

@@ -19,12 +19,11 @@ void CryptoDES::setKey(uint64_t key) { m_key = key; }
 void CryptoDES::encryptECB(char *message, size_t size, const char *key) {
     DESCtx ctx;
 
-    memcpy(ctx.key, key, 8);
+    memcpy(ctx.key, key, KEY_BYTES);
     ctx.message = message;
-    ctx.messageSize = size; //TODO: modify this to have a better max size
+    ctx.messageSize = size;
 
     initialize(&ctx);
-
     finalize(&ctx, EncryptT);
 
     sanitize(&ctx);
@@ -33,9 +32,9 @@ void CryptoDES::encryptECB(char *message, size_t size, const char *key) {
 void CryptoDES::decryptECB(char *ciphertext, size_t size, const char *key) {
     DESCtx ctx;
 
-    memcpy(ctx.key, key, 8);
+    memcpy(ctx.key, key, KEY_BYTES);
     ctx.message = ciphertext;
-    ctx.messageSize = size; //TODO: modify this to have a better max size
+    ctx.messageSize = size;
     initialize(&ctx);
 
     finalize(&ctx, DecryptT);

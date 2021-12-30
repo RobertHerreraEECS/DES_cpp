@@ -1,4 +1,5 @@
-name: C/C++ CI
+
+name: DES Unit Tests
 
 on:
   push:
@@ -10,10 +11,13 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@master
-    - name: make build
-      run: mkdir build && cd build && cmake ..
-    - test: test build
+    - uses: actions/checkout@v2
+    - name: mkdir build
+      run: mkdir build
+    - name: cd build
+      run: cd build && cmake ../
+    - name: cd build && make
+      run: cd build && make
+    - name: run tests
       run: ./bin/desTest

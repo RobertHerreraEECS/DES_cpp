@@ -5,7 +5,6 @@
 
 // TODO: use boost
 // modify the output size and take into accout
-// memory corruption with block size
 
 CryptoDES::CryptoDES() {
     m_key = 0x0;

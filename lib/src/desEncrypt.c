@@ -225,42 +225,8 @@ uint32_t sBoxPermutation (const uint32_t block, uint64_t key) {
 
         int index = (NUM_BLOCKS*row + column);
 
-        // TODO: this branching is slow
-        switch(sBoxCount) {
-            case 1:
-                sLookup |= S1[index];
-                sLookup = sLookup << 4;
-                break;
-            case 2:
-                sLookup |= S2[index];
-                sLookup = sLookup << 4;
-                break;
-            case 3:
-                sLookup |= S3[index];
-                sLookup = sLookup << 4;
-            	break;
-            case 4:
-            	sLookup |= S4[index];
-                sLookup = sLookup << 4;
-            	break;
-            case 5:
-            	sLookup |= S5[index];
-                sLookup = sLookup << 4;
-            	break;
-            case 6:
-            	sLookup |= S6[index];
-                sLookup = sLookup << 4;
-            	break;
-            case 7:
-                sLookup |= S7[index];
-                sLookup = sLookup << 4;
-                break;
-            case 8:
-                sLookup |= S8[index];
-                break;
-            default:
-                break;
-        }
+        sLookup |= SBOXMAP[sBoxCount - 1][index];
+        if (sBoxCount != 8) sLookup <<= 4; 
         sBoxCount++;
     }
 

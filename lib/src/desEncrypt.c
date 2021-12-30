@@ -20,32 +20,43 @@ extern "C"
 #endif
 
 
-void initialize(DESCtx *ctx) {
+CryptAPI initialize(DESCtx *ctx) {
+
+    size_t numBlocks = 0;
 
     memset(ctx->subkeys, 0, sizeof(uint64_t) * NUM_SUB_KEYS);
 
-    // generate key schedule
+    if (ctx->inSize == 0) {
+        printf("Specify a message size within the context.\n");
+        return CRYPT_INPUT_ERROR;
+    }
+
+    numBlocks = (ctx->inSize / 8);
+    if (ctx->inSize % 8 > 0)
+        numBlocks += 1;
+    ctx->blocks = numBlocks;
+    ctx->outSize = 8 * numBlocks;
+
+    ctx->out = (char *) calloc(1, ctx->outSize);
+
+    CRYPT_MEMCPY(ctx->out, ctx->in, ctx->inSize);
+
     generateKeySchedule(*((uint64_t *) ctx->key), ctx->subkeys);
+
+    return CRYPT_SUCCESS;
 }
 
-void finalize(DESCtx *ctx, CtxType type) {
+CryptAPI finalize(DESCtx *ctx, CtxType type) {
     bool cryptType = false;
-    int numBlocks, i = 0;
+    int i = 0;
     uint64_t *dataPtr = NULL;
 
     if (type == DecryptT)
         cryptType = true;
 
-    dataPtr = (uint64_t *) (ctx->message);
+    dataPtr = (uint64_t *) (ctx->out);
 
-    // iterate over number of blocks,
-    // and pad to the neareset block size
-    numBlocks = (ctx->messageSize / 8);
-    if (ctx->messageSize % 8 > 0)
-        numBlocks += 1;
-
-    for (i = 0; i < numBlocks; i++) {
-
+    for (i = 0; i < ctx->blocks; i++) {
 
         #if defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN || \
         defined(__LITTLE_ENDIAN__) || \
@@ -64,7 +75,6 @@ void finalize(DESCtx *ctx, CtxType type) {
 
         CryptDES(dataPtr, ctx->subkeys, cryptType);
 
-
         #if defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN || \
         defined(__LITTLE_ENDIAN__) || \
         defined(__ARMEL__) || \
@@ -82,9 +92,15 @@ void finalize(DESCtx *ctx, CtxType type) {
 
         dataPtr++;
     }
+
+    return CRYPT_SUCCESS;
 }
 
+
 void sanitize(DESCtx *ctx) {
+    if (ctx->out != NULL) {
+        free(ctx->out);
+    }
     memset(ctx, 0, sizeof(DESCtx));
 }
 
@@ -137,7 +153,7 @@ void generateKeySchedule(const uint64_t key, uint64_t *subKeys) {
     uint32_t _c[NUM_SUB_KEYS+1] = {0};
     uint32_t _d[NUM_SUB_KEYS+1] = {0};
     uint64_t _cd[NUM_SUB_KEYS] = {0};
-
+    uint32_t temp = 0;
     int shiftSchedule[NUM_SUB_KEYS] = {1,1,2,2,2,2,2,2,1,2,2,2,2,2,2,1};
 
     //load key in big endian and perform PC-1
@@ -151,7 +167,7 @@ void generateKeySchedule(const uint64_t key, uint64_t *subKeys) {
 
     for (i = 1; i < NUM_SUB_KEYS + 1; i++) {
     
-        uint32_t temp = _d[i-1];
+        temp = _d[i-1];
         for (j = 1; j <= shiftSchedule[i-1]; j++) {
             _d[i] = (temp << 1) | (1 & (temp >> 27));
             temp = _d[i];
@@ -183,8 +199,9 @@ void generateKeySchedule(const uint64_t key, uint64_t *subKeys) {
 }
 
 uint32_t sBoxPermutation (const uint32_t block, uint64_t key) {
-    int j;
+    int j, count, sBoxCount;
     uint32_t pOut = 0;
+    uint32_t sLookup;
     uint64_t _e = 0;
 
     // expand right block (E)
@@ -192,9 +209,9 @@ uint32_t sBoxPermutation (const uint32_t block, uint64_t key) {
     _e |= (((uint64_t) (block >>  ((INT_SIZE32) - E[j])) & 0x1) << ((INT_SIZE48) - j - 1));
 
     // sBox Lookup table
-    int count = INT_SIZE48;
-    int sBoxCount = 1;
-    uint32_t sLookup = 0;
+    count = INT_SIZE48;
+    sBoxCount = 1;
+    sLookup = 0;
     while (count != 0) {
 
         count -= 6;
@@ -208,8 +225,6 @@ uint32_t sBoxPermutation (const uint32_t block, uint64_t key) {
 
         int index = (NUM_BLOCKS*row + column);
 
-	// TODO: eliminate this lookup and optimize
-	// to branchless lookup
         switch(sBoxCount) {
             case 1:
                 sLookup |= S1[index];

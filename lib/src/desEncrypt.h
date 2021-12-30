@@ -1,12 +1,14 @@
 #ifndef DES_ENCRYPT_H
 #define DES_ENCRYPT_H
 
-#include <inttypes.h>
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
+
+#include <inttypes.h>
+#include <string.h>
+
 
 #define MAX_SIZE sizeof(uint64_t) * 8
 #define INT_SIZE64 sizeof(uint64_t) * 8
@@ -17,6 +19,8 @@ extern "C"
 #define NUM_SUB_KEYS 16
 #define KEY_BYTES 8
 
+#define MEMCLEAR(s, c, n) memset((s), (c), (n))
+#define CRYPT_MEMCPY(dest, src, n) memcpy((dest), (src), (n))
 
 /**
 * @brief Populating this context is recommeded
@@ -30,8 +34,11 @@ extern "C"
 */
 typedef struct context {
     char key[8];
-    char *message;
-    int messageSize;
+    char *in;
+    char *out;
+    size_t inSize;
+    size_t outSize;
+    int blocks;
     uint64_t subkeys[NUM_SUB_KEYS];
 } DESCtx;
 
@@ -48,26 +55,46 @@ typedef enum ctx_type {
 } CtxType;
 
 /**
-* @brief Initialize the DES context by expanding 
-* @param ctx DES Context
+* @brief Specify padding type when
+* encrypting and decrypting.
 */
-void initialize(DESCtx *ctx);
+typedef enum pad_type {
+    ZeroPad,
+    PKCS5Pad,
+} PadMode;
+
+
+typedef enum {
+    CRYPT_SUCCESS,        // no errors to report
+    CRYPT_INPUT_ERROR,    // any error pertaining to invalid input
+    CRYPT_CRITICAL_ERROR, // any error indicating fatal error and immediate exit
+} CryptAPI;
+
+/**
+* @brief Initialize the DES context by expanding 
+* @param ctx DES Context containing block size, input, output and key
+*       schedule.
+* @return CryptAPI status of initialization when generating blocks
+*           and key schedule.
+*/
+CryptAPI initialize(DESCtx *ctx);
 
 /**
 * @brief finalize DES context
-* @return uint32_t sbox permutation for a given subkey
+* @return CryptAPI status of encryption/decryption
 */
-void finalize(DESCtx *ctx, CtxType type);
+CryptAPI finalize(DESCtx *ctx, CtxType type);
 
 
 /**
 * @brief destroy context info
+* @param ctx cipher context.
 */
 void sanitize(DESCtx *ctx);
 
 /**
 * @brief sBox permutation to be done at each round
-* @param 32 bit block of data to undergo permutation
+* @param block 32 bit block of data to undergo permutation
 * @param key 56 bit key
 * @return uint32_t sbox permutation for a given subkey
 */
@@ -76,7 +103,8 @@ uint32_t sBoxPermutation (const uint32_t block, uint64_t key);
 /**
 * @brief generate 16 56-bit sub keys
 * @param key 56 bit key
-* @param array of 56 bit sub keys
+* @param subKeys key schedule pointer that is populated dervied
+*   from the input key.
 */
 void generateKeySchedule(const uint64_t key, uint64_t *subKeys);
 

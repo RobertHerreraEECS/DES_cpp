@@ -1,11 +1,5 @@
 #ifndef ENCRYPTION_H
 #define ENCRYPTION_H
-
-#include "desEncrypt.h"
-#include <vector>
-#include <string>
-#include <cstdlib>
-#include <cstdint>
 #include <random>
 
 #ifdef __cplusplus
@@ -29,24 +23,28 @@ public:
     /**
      *  @brief encrypt data in place using DES cipher
      *  in ECB Mode.
-     *  @param message input plaintext to be encrypted
-     *  @param size the size of the input plaintext
+     *  @param in input plaintext to be encrypted
+     *  @param inSize the size of the input plaintext
+     *  @param out output buffer containing encrypted data.
+     *  @param outSize size of the encrypted output buffer.
      *  @key the key used to encrypt data. This key is to
      *  be 8 bytes in length. If longer than 8 bytes, only
      *  the first 8 are copied and used.
      **/
-    void encryptECB(char *message, size_t size, const char *key);
+    void encryptECB(char *in, size_t inSize, char **out, size_t *outSize, const char *key);
 
     /**
      *  @brief decrypt data in place using DES cipher
      *  in ECB Mode.
-     *  @param message input plaintext to be encrypted
-     *  @param size the size of the input plaintext
-     *  @key the key used to encrypt data. This key is to
+     *  @param in input plaintext to be decrypted
+     *  @param inSize the size of the input plaintext
+     *  @param out output buffer containing encrypted data.
+     *  @param outSize size of the decrypted output buffer.
+     *  @key the key used to decrypt data. This key is to
      *  be 8 bytes in length. If longer than 8 bytes, only
      *  the first 8 are copied and used.
      **/
-    void decryptECB(char *ciphertext, size_t size, const char *key);
+    void decryptECB(char *in, size_t inSize, char **out, size_t *outSize, const char *key);
 
     /**
     * @brief get key currently loaded
@@ -81,7 +79,7 @@ private:
     * @brief get random 64 bit value
     * @return uint64_t
     */
-    uint64_t getRandomValue();
+    uint64_t getRandU64();
 
     uint64_t m_key; // encryption key
     uint64_t m_iv; // intialization vector

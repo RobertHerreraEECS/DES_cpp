@@ -2,7 +2,6 @@
 #include <fstream>
 #include <string>
 #include "encryption.h"
-//#include "desEncrypt.h"
 
 using namespace std;
 
@@ -13,12 +12,13 @@ typedef struct {
 } UserInfo;
 
 
-void unhexlify(char *data) {
-
+uint64_t unhexlify(string hexlified) {
+    size_t idx = 0;
+    return stoull(hexlified, &idx, 16);
 }
 
-string hexlify(char *data, size_t size){
-    return string("DEADBEEF");
+string hexlify(uint64_t *unhexlified){
+    return to_string((unsigned long long) *unhexlified);
 }
 
 void parseArgs(int argc, char *argv[]) {
@@ -32,6 +32,13 @@ void usage() {
 
 int main(int argc, char *argv[]){
 
+    const uint64_t key = 0x0E329232EA6D0D73;
+    string str_string = "0x0E329232EA6D0D73";
+    CryptoDES desCryptCtx;
+    ofstream myfile;
+    char *out = NULL;
+    size_t size = 0;
+
     if (argc < 2) {
         usage();
         exit(-1);
@@ -39,10 +46,16 @@ int main(int argc, char *argv[]){
 
     parseArgs(argc, argv);
 
-    CryptoDES desCryptCtx;
-    const uint8_t key[8] = { 0xde, 0xad, 0xbe, 0xef, 0xfa, 0xce, 0xfa, 0xde };
-    string a = "this text needs to be encrypted and decrypted!!!";
+    string a = "Your lips are smoother than vaseline\r\n";
     char* c = const_cast<char*>(a.c_str());
+
+    desCryptCtx.encryptECB(c, a.size(), &out, &size, (const char *)&key);
+
+    myfile.open("output.bin");
+    if (myfile.is_open()) {
+      cout << "Writing encrypted data to file..." << endl;
+      myfile.write(out, size);
+    }
 
     return 0;
  }

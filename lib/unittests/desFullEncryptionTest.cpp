@@ -30,12 +30,12 @@ TEST(singleEncryptTest, singleChunk1) {
     DESCtx ctx;
 
     memcpy(ctx.key, (char *) &key, KEY_BYTES);
-    ctx.message = (char *) &message;
-    ctx.messageSize = 8;
+    ctx.in = (char *) &message;
+    ctx.inSize = 8;
     initialize(&ctx);
     finalize(&ctx, EncryptT);
 
-    EXPECT_EQ (C,  message);
+    EXPECT_EQ (C,  *(uint64_t *) ctx.out);
 }
 
 TEST(singleEncryptTest, singleChunk2) {
@@ -45,12 +45,12 @@ TEST(singleEncryptTest, singleChunk2) {
     DESCtx ctx;
 
     memcpy(ctx.key, (char *) &key, KEY_BYTES);
-    ctx.message = (char *) &message;
-    ctx.messageSize = 8;
+    ctx.in = (char *) &message;
+    ctx.inSize = 8;
     initialize(&ctx);
     finalize(&ctx, EncryptT);
 
-    EXPECT_EQ (C,  message);
+    EXPECT_EQ (C,  *(uint64_t *) ctx.out);
 }
 
 TEST(singleDecryptTest, singleChunk1) {
@@ -60,29 +60,28 @@ TEST(singleDecryptTest, singleChunk1) {
     DESCtx ctx;
 
     memcpy(ctx.key, (char *) &key, KEY_BYTES);
-    ctx.message = (char *) &C;
-    ctx.messageSize = 8;
+    ctx.in = (char *) &C;
+    ctx.inSize = 8;
     initialize(&ctx);
     finalize(&ctx, DecryptT);
 
-    EXPECT_EQ (message,  C);	
+    EXPECT_EQ (*(uint64_t *) ctx.out,  message);	
 }
 
 TEST(singleDecryptTest, singleChunk2) {
     uint64_t C = 0x5b40a0f5413e885;
     uint64_t key = 0x133457799BBCDFF1;
 
-    // load in as big endian
     uint64_t message = 0xefcdab8967452301;
     DESCtx ctx;
 
     memcpy(ctx.key, (char *) &key, KEY_BYTES);
-    ctx.message = (char *) &C;
-    ctx.messageSize = 8;
+    ctx.in = (char *) &C;
+    ctx.inSize = 8;
     initialize(&ctx);
     finalize(&ctx, DecryptT);
 
-    EXPECT_EQ (message,  C);
+    EXPECT_EQ (*(uint64_t *) ctx.out,  message);
 }
 
 TEST(encryptionTest, test1) {
@@ -94,8 +93,8 @@ TEST(encryptionTest, test1) {
     DESCtx ctx;
 
     memcpy(ctx.key, (char *) &key, KEY_BYTES);
-    ctx.message = (char *) &message;
-    ctx.messageSize = strlen(message);
+    ctx.in = message;
+    ctx.inSize = strlen(message);
 
     initialize(&ctx);
     finalize(&ctx, EncryptT);
@@ -106,15 +105,14 @@ TEST(encryptionTest, test1) {
     ciphertext[3] = 0x998435f5782fd5d9; // typo in documentation
     ciphertext[4] = 0x53e6e053b4c98a82; // values in little-endian equivalent
 
-    ref = (uint64_t *) &message;
-    for (int i = 0; i < 5; i++) {
+    ref = (uint64_t *) ctx.out;
+    for (int i = 0; i < ctx.blocks; i++) {
         EXPECT_EQ (ciphertext[i], ref[i]);
     }
 }
 
 TEST(decryptionTest, test1) {
 
-    // Your lips are smoother than vaseline (zero padded)
     char message[] = "Your lips are smoother than vaseline\r\n";
     uint64_t *ref = NULL;
     uint64_t key = 0x0E329232EA6D0D73;
@@ -135,15 +133,14 @@ TEST(decryptionTest, test1) {
     ciphertext[4] = 0x53e6e053b4c98a82; // values in little-endian equivalent
  
     memcpy(ctx.key, (char *) &key, KEY_BYTES);
-    ctx.message = (char *) &ciphertext;
-    ctx.messageSize = 40;
+    ctx.in = (char *) ciphertext;
+    ctx.inSize = 40;
 
     initialize(&ctx);
     finalize(&ctx, DecryptT);
 
-    ref = (uint64_t *) &ciphertext;
+    ref = (uint64_t *) ctx.out;
     for (int i = 0; i < 5; i++) {
          EXPECT_EQ (ref[i],  a[i]);
     }
 }
-

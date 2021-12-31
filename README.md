@@ -55,7 +55,7 @@ Zero padding, in this implementation, is defined as implicity allocating the out
 CPP main output is compared against OpenSSL in several modes of operation.
 
 # Supported Modes of Operation
-*ECB
-*CBC
-*CFB
-*OFB
+* ECB
+* CBC
+* CFB
+* OFB

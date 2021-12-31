@@ -4,6 +4,8 @@ DES Encryption is a c++ based application that aims to re-work an initial implem
 
 OpenSSL supports PKCS padding by default so its recommeded that you use this in PKCS5 padding mode. This padding scheme is more reliable compared to zero padding. Zero padding contains edge cases where you may not be able to guarantee exact recovery the original plaintext data.
 
+DES CPP runs in ECB Mode by default unless otherwise specified on the command line.
+
 ## Notes
 execute:
 <pre>

@@ -1,10 +1,8 @@
 #include "encryption.h"
 #include <random>
 #include <iostream>
+#include <string>
 #include <cstring>
-
-// TODO: use boost
-// modify the output size and take into accout
 
 CryptoDES::CryptoDES() {
     m_key = 0x0;
@@ -21,6 +19,8 @@ void CryptoDES::setKey(uint64_t key) { m_key = key; }
 
 void CryptoDES::encryptECB(char *in, size_t inSize, char **out, size_t *outSize, const char *key) {
     DESCtx *ctx = (DESCtx *) malloc(sizeof(DESCtx));
+
+    ctx->pad = PKCS5Pad;
 
     memcpy(ctx->key, key, KEY_BYTES);
     ctx->in = in;

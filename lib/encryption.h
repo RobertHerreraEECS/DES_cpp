@@ -11,6 +11,11 @@ extern "C"
 }
 #endif
 
+/*
+*  CryptoDES Class
+*
+*  Use the cipher wrapper class to encrypt/decrypt 
+**/
 
 // DES Cipher Wrapper Class
 class CryptoDES {
@@ -22,7 +27,8 @@ public:
 
     /**
      *  @brief encrypt data in place using DES cipher
-     *  in ECB Mode.
+     *  in ECB Mode. The user is responsible for sanitizing the
+     *  context after use. (See `finish`)
      *  @param in input plaintext to be encrypted
      *  @param inSize the size of the input plaintext
      *  @param out output buffer containing encrypted data.
@@ -47,18 +53,33 @@ public:
     void decryptECB(char *in, size_t inSize, char **out, size_t *outSize, const char *key);
 
     /**
+    * @brief sanitize the generated crypto context and free
+    *   allocated buffers.
+    */
+    CryptAPI finish();
+
+    /**
     * @brief get key currently loaded
     * @return uint64_t key
     */
     uint64_t getKey();
 
     /**
-    * @brief set 64 bit key
+    * @brief set 64 bit key.
+    *
+    * Use unhexlify to transform a hexlified key.
     */
     void setKey(uint64_t key);
 
     /**
-    * @brief get current IV
+    * @brief set 64 bit key
+    *
+    * Use unhexlify to transform a hexlified key.
+    */
+    void setIV(uint64_t key);
+
+    /**
+    * @brief get current IV loaded into memory.
     * @return uint64_t IV
     */
     uint64_t getIV();
@@ -81,9 +102,10 @@ private:
     */
     uint64_t getRandU64();
 
-    uint64_t m_key; // encryption key
-    uint64_t m_iv; // intialization vector
-    uint64_t m_nonce; // nonce for Counter Mode
+    uint64_t m_key;                // encryption key
+    uint64_t m_iv;                 // intialization vector
+    uint64_t m_nonce;              // nonce for Counter Mode
+    PadMode  m_padMode = PKCS5Pad; // default padding mode
     std::mt19937 m_gen;
 
 };

@@ -19,10 +19,19 @@ extern "C"
 
 #endif
 
+void dumphex(char *data, int size) {
+    int i;
+    int row = 8;
+    for(i = 0; i < size; i++) {
+        printf("%02x", (uint8_t) data[i]);
+        if (i % row == 0 && i != 0)
+        printf("\n");
+    }
+    printf("\n");
+}
 
 CryptAPI initialize(DESCtx *ctx) {
-
-    size_t numBlocks = 0;
+    size_t numBlocks, padding = 0,i = 0;
 
     memset(ctx->subkeys, 0, sizeof(uint64_t) * NUM_SUB_KEYS);
 
@@ -32,30 +41,57 @@ CryptAPI initialize(DESCtx *ctx) {
     }
 
     numBlocks = (ctx->inSize / 8);
-    if (ctx->inSize % 8 > 0)
-        numBlocks += 1;
+    numBlocks += 1;
+
+    padding = (8 - (ctx->inSize % 8));
     ctx->blocks = numBlocks;
     ctx->outSize = 8 * numBlocks;
 
     ctx->out = (char *) calloc(1, ctx->outSize);
 
+    if (ctx->pad == PKCS5Pad) {
+        for (i = 0; i < padding; i++) {
+            ctx->out[ctx->inSize + i] = padding;
+        }
+    }
+
     CRYPT_MEMCPY(ctx->out, ctx->in, ctx->inSize);
 
-    generateKeySchedule(*((uint64_t *) ctx->key), ctx->subkeys);
+    //dumphex(ctx->out, ctx->outSize);
 
+    generateKeySchedule(*((uint64_t *) ctx->key), ctx->subkeys);
     return CRYPT_SUCCESS;
 }
 
 CryptAPI finalize(DESCtx *ctx, CtxType type) {
     bool cryptType = false;
-    int i = 0;
-    uint64_t *dataPtr = NULL;
+    CryptAPI ret;
+   
+    ctx->op = ECB_Mode;
 
     if (type == DecryptT)
         cryptType = true;
 
-    dataPtr = (uint64_t *) (ctx->out);
+    if (ctx->op == ECB_Mode) 
+    ret = encryptBlocksECB(ctx, cryptType);
 
+    if (ctx->op == CBC_Mode) 
+    ret = encryptBlocksCBC(ctx, cryptType);
+
+    if (ctx->op == CFB_Mode) 
+    ret = encryptBlocksCFB(ctx, cryptType);
+
+    if (ctx->op == OFB_Mode) 
+    ret = encryptBlocksOFB(ctx, cryptType);
+
+    return ret;
+}
+
+CryptAPI encryptBlocksECB(DESCtx *ctx, bool cryptType) {
+    int i = 0;
+    uint64_t *dataPtr = NULL;
+
+    dataPtr = (uint64_t *) (ctx->out);
     for (i = 0; i < ctx->blocks; i++) {
 
         #if defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN || \
@@ -96,6 +132,157 @@ CryptAPI finalize(DESCtx *ctx, CtxType type) {
     return CRYPT_SUCCESS;
 }
 
+CryptAPI encryptBlocksCBC(DESCtx *ctx, bool cryptType) {
+    int i = 0;
+    uint64_t *dataPtr = NULL;
+    uint64_t *chainData = NULL;
+
+    // cbc mode
+    CryptDES((uint64_t *) ctx->iv, ctx->subkeys, cryptType);
+    chainData = (uint64_t *) ctx->iv;
+    for (i = 0; i < ctx->blocks; i++) {
+
+        #if defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN || \
+        defined(__LITTLE_ENDIAN__) || \
+        defined(__ARMEL__) || \
+        defined(__THUMBEL__) || \
+        defined(__AARCH64EL__) || \
+        defined(_MIPSEL) || defined(__MIPSEL) || defined(__MIPSEL__)
+        #if defined(_WIN32) || defined(_WIN64)
+        *dataPtr = _byteswap_uint64(*dataPtr);
+        #elif defined (__linux__)
+        *dataPtr = bswap_64(*dataPtr);
+        #elif defined (__MACH__) || defined (__unix__)
+        *dataPtr = __builtin_bswap64(*dataPtr);
+        #endif
+        #endif
+
+        if (i == 0)
+        chainData = (uint64_t *) ctx->iv;
+
+        *dataPtr ^= *chainData;
+        CryptDES(dataPtr, ctx->subkeys, cryptType);
+        *chainData = *dataPtr;
+
+        #if defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN || \
+        defined(__LITTLE_ENDIAN__) || \
+        defined(__ARMEL__) || \
+        defined(__THUMBEL__) || \
+        defined(__AARCH64EL__) || \
+        defined(_MIPSEL) || defined(__MIPSEL) || defined(__MIPSEL__)
+        #if defined(_WIN32) || defined(_WIN64)
+        *dataPtr = _byteswap_uint64(*dataPtr);
+        #elif defined (__linux__)
+        *dataPtr = bswap_64(*dataPtr);
+        #elif defined (__MACH__) || defined (__unix__)
+        *dataPtr = __builtin_bswap64(*dataPtr);
+        #endif
+        #endif
+
+        dataPtr++;
+    }
+
+    return CRYPT_SUCCESS;
+}
+
+CryptAPI encryptBlocksCFB(DESCtx *ctx, bool cryptType) {
+    int i = 0;
+    uint64_t *dataPtr = NULL;
+    uint64_t *chainData = NULL;
+
+    // cfb mode
+    CryptDES((uint64_t *) ctx->iv, ctx->subkeys, cryptType);
+    chainData = (uint64_t *) ctx->iv;
+    for (i = 0; i < ctx->blocks; i++) {
+
+        #if defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN || \
+        defined(__LITTLE_ENDIAN__) || \
+        defined(__ARMEL__) || \
+        defined(__THUMBEL__) || \
+        defined(__AARCH64EL__) || \
+        defined(_MIPSEL) || defined(__MIPSEL) || defined(__MIPSEL__)
+        #if defined(_WIN32) || defined(_WIN64)
+        *dataPtr = _byteswap_uint64(*dataPtr);
+        #elif defined (__linux__)
+        *dataPtr = bswap_64(*dataPtr);
+        #elif defined (__MACH__) || defined (__unix__)
+        *dataPtr = __builtin_bswap64(*dataPtr);
+        #endif
+        #endif
+
+        *dataPtr ^= *chainData;
+        CryptDES(dataPtr, ctx->subkeys, cryptType);
+        *chainData = *dataPtr;
+
+        #if defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN || \
+        defined(__LITTLE_ENDIAN__) || \
+        defined(__ARMEL__) || \
+        defined(__THUMBEL__) || \
+        defined(__AARCH64EL__) || \
+        defined(_MIPSEL) || defined(__MIPSEL) || defined(__MIPSEL__)
+        #if defined(_WIN32) || defined(_WIN64)
+        *dataPtr = _byteswap_uint64(*dataPtr);
+        #elif defined (__linux__)
+        *dataPtr = bswap_64(*dataPtr);
+        #elif defined (__MACH__) || defined (__unix__)
+        *dataPtr = __builtin_bswap64(*dataPtr);
+        #endif
+        #endif
+
+        dataPtr++;
+    }
+    
+    return CRYPT_SUCCESS;
+}
+
+CryptAPI encryptBlocksOFB(DESCtx *ctx, bool cryptType) {
+    int i = 0;
+    uint64_t *dataPtr = NULL;
+    uint64_t *chainData = NULL;
+
+    // ofb mode (stream cipher)
+    CryptDES((uint64_t *) ctx->iv, ctx->subkeys, cryptType);
+    chainData = (uint64_t *)  ctx->iv;
+    for (i = 0; i < ctx->blocks; i++) {
+
+        #if defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN || \
+        defined(__LITTLE_ENDIAN__) || \
+        defined(__ARMEL__) || \
+        defined(__THUMBEL__) || \
+        defined(__AARCH64EL__) || \
+        defined(_MIPSEL) || defined(__MIPSEL) || defined(__MIPSEL__)
+        #if defined(_WIN32) || defined(_WIN64)
+        *dataPtr = _byteswap_uint64(*dataPtr);
+        #elif defined (__linux__)
+        *dataPtr = bswap_64(*dataPtr);
+        #elif defined (__MACH__) || defined (__unix__)
+        *dataPtr = __builtin_bswap64(*dataPtr);
+        #endif
+        #endif
+
+        *dataPtr ^= *chainData;
+        CryptDES(chainData, ctx->subkeys, cryptType);
+
+        #if defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN || \
+        defined(__LITTLE_ENDIAN__) || \
+        defined(__ARMEL__) || \
+        defined(__THUMBEL__) || \
+        defined(__AARCH64EL__) || \
+        defined(_MIPSEL) || defined(__MIPSEL) || defined(__MIPSEL__)
+        #if defined(_WIN32) || defined(_WIN64)
+        *dataPtr = _byteswap_uint64(*dataPtr);
+        #elif defined (__linux__)
+        *dataPtr = bswap_64(*dataPtr);
+        #elif defined (__MACH__) || defined (__unix__)
+        *dataPtr = __builtin_bswap64(*dataPtr);
+        #endif
+        #endif
+
+        dataPtr++;
+    }
+
+    return CRYPT_SUCCESS;
+}
 
 void sanitize(DESCtx *ctx) {
     if (ctx->out != NULL) {
@@ -191,7 +378,7 @@ void generateKeySchedule(const uint64_t key, uint64_t *subKeys) {
         _cd[i] |= _d[i+1];
     }
 
-    // generate subkeys
+    // generate key schedule
     for (i = 0; i < NUM_SUB_KEYS; i++) {
         for (j = 0; j < (INT_SIZE48); j++)
 	    subKeys[i] |= (_cd[i] >> ((INT_SIZE56) - PC2[j]) & 0x1) << ((INT_SIZE48) - j - 1);
@@ -199,10 +386,11 @@ void generateKeySchedule(const uint64_t key, uint64_t *subKeys) {
 }
 
 uint32_t sBoxPermutation (const uint32_t block, uint64_t key) {
-    int j, count, sBoxCount;
+    uint64_t _e = 0;
     uint32_t pOut = 0;
     uint32_t sLookup;
-    uint64_t _e = 0;
+    int j, index, count = 0, sBoxCount = 0;
+    uint8_t sCmpn, row = 0, column = 0;
 
     // expand right block (E)
     for (j = 0; j < INT_SIZE48; j++)
@@ -217,13 +405,11 @@ uint32_t sBoxPermutation (const uint32_t block, uint64_t key) {
         count -= 6;
 
         // extract 6 bits at a time from output of e ^ K
-        uint8_t sCmpn = (((_e ^ key) >> (count)) << 2) >> 2;
-        uint8_t row = 0;
-        uint8_t column = 0;
+        sCmpn = (((_e ^ key) >> (count)) << 2) >> 2;
         row = (((sCmpn >> 5) & 1) << 1) | (sCmpn & 1);
         column = (sCmpn >> 1) & 0xf;
 
-        int index = (NUM_BLOCKS*row + column);
+        index = (NUM_BLOCKS*row + column);
 
         sLookup |= SBOXMAP[sBoxCount - 1][index];
         if (sBoxCount != 8) sLookup <<= 4; 

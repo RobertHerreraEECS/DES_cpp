@@ -57,8 +57,6 @@ CryptAPI initialize(DESCtx *ctx) {
 
     CRYPT_MEMCPY(ctx->out, ctx->in, ctx->inSize);
 
-    //dumphex(ctx->out, ctx->outSize);
-
     generateKeySchedule(*((uint64_t *) ctx->key), ctx->subkeys);
     return CRYPT_SUCCESS;
 }
@@ -67,7 +65,10 @@ CryptAPI finalize(DESCtx *ctx, CtxType type) {
     bool cryptType = false;
     CryptAPI ret;
    
-    ctx->op = ECB_Mode;
+    if (ctx->op == UNK_Mode) {
+        printf("Specify a mode of operation.\n");
+        return CRYPT_INPUT_ERROR;
+    }
 
     if (type == DecryptT)
         cryptType = true;
@@ -90,6 +91,7 @@ CryptAPI finalize(DESCtx *ctx, CtxType type) {
 CryptAPI encryptBlocksECB(DESCtx *ctx, bool cryptType) {
     int i = 0;
     uint64_t *dataPtr = NULL;
+
 
     dataPtr = (uint64_t *) (ctx->out);
     for (i = 0; i < ctx->blocks; i++) {
@@ -137,9 +139,9 @@ CryptAPI encryptBlocksCBC(DESCtx *ctx, bool cryptType) {
     uint64_t *dataPtr = NULL;
     uint64_t *chainData = NULL;
 
-    // cbc mode
-    CryptDES((uint64_t *) ctx->iv, ctx->subkeys, cryptType);
-    chainData = (uint64_t *) ctx->iv;
+    *(uint64_t *) ctx->iv = 0;
+
+    dataPtr = (uint64_t *) (ctx->out);
     for (i = 0; i < ctx->blocks; i++) {
 
         #if defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN || \
@@ -190,9 +192,9 @@ CryptAPI encryptBlocksCFB(DESCtx *ctx, bool cryptType) {
     uint64_t *dataPtr = NULL;
     uint64_t *chainData = NULL;
 
-    // cfb mode
-    CryptDES((uint64_t *) ctx->iv, ctx->subkeys, cryptType);
-    chainData = (uint64_t *) ctx->iv;
+    *(uint64_t *) ctx->iv = 0;
+
+    dataPtr = (uint64_t *) (ctx->out);
     for (i = 0; i < ctx->blocks; i++) {
 
         #if defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN || \
@@ -210,8 +212,13 @@ CryptAPI encryptBlocksCFB(DESCtx *ctx, bool cryptType) {
         #endif
         #endif
 
+        if (i == 0)
+        chainData = (uint64_t *) ctx->iv;
+
+        CryptDES(chainData, ctx->subkeys, cryptType);
+
         *dataPtr ^= *chainData;
-        CryptDES(dataPtr, ctx->subkeys, cryptType);
+
         *chainData = *dataPtr;
 
         #if defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN || \
@@ -231,7 +238,7 @@ CryptAPI encryptBlocksCFB(DESCtx *ctx, bool cryptType) {
 
         dataPtr++;
     }
-    
+
     return CRYPT_SUCCESS;
 }
 
@@ -240,9 +247,9 @@ CryptAPI encryptBlocksOFB(DESCtx *ctx, bool cryptType) {
     uint64_t *dataPtr = NULL;
     uint64_t *chainData = NULL;
 
-    // ofb mode (stream cipher)
-    CryptDES((uint64_t *) ctx->iv, ctx->subkeys, cryptType);
-    chainData = (uint64_t *)  ctx->iv;
+    *(uint64_t *) ctx->iv = 0;
+
+    dataPtr = (uint64_t *) (ctx->out);
     for (i = 0; i < ctx->blocks; i++) {
 
         #if defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN || \
@@ -260,8 +267,12 @@ CryptAPI encryptBlocksOFB(DESCtx *ctx, bool cryptType) {
         #endif
         #endif
 
-        *dataPtr ^= *chainData;
+        if (i == 0)
+        chainData = (uint64_t *) ctx->iv;
+
         CryptDES(chainData, ctx->subkeys, cryptType);
+
+        *dataPtr ^= *chainData;
 
         #if defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN || \
         defined(__LITTLE_ENDIAN__) || \

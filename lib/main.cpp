@@ -104,7 +104,9 @@ int main(int argc, char *argv[]){
 
     CryptoDES desCryptCtx;
     std::vector<char> buffer;
-
+    uint64_t key = 0x0E329232EA6D0D73;
+    char *output;
+    size_t osize;
 
     if (argc < 4) {
         usage();
@@ -112,7 +114,6 @@ int main(int argc, char *argv[]){
     }
     if (!parseArgs(argc, argv))
     exit(-1);
-
 
     desCryptCtx.setKey(unhexlify(hexkey));
 
@@ -129,15 +130,16 @@ int main(int argc, char *argv[]){
     }
 
     cout << string(buffer.begin(), buffer.end()) << endl;
-    /*
 
-    //desCryptCtx.encryptECB(c, a.size(), &out, &size, (const char *)&key);
+    //TODO: finish out input-based modes
+    desCryptCtx.encryptCFB((char *) buffer.data(), buffer.size(), &output, &osize, (const char *)&key);
 
-    infile.open("output.bin");
-    if (infile.is_open()) {
+    std::ofstream ofile(outfile, std::ios::binary | std::ios::ate);
+    if (ofile.is_open()) {
       cout << "Writing encrypted data to file..." << endl;
-      infile.write(out, size);
+      ofile.write(output, osize);
+    } else {
+        cout << "error opening file.\n";
     }
-    */
     return 0;
  }

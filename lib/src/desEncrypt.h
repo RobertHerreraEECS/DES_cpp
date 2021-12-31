@@ -27,6 +27,7 @@ extern "C"
 * @brief Mode of operation.
 */
 typedef enum Op_Type{
+    UNK_Mode = -1,
     ECB_Mode,
     CBC_Mode,
     CFB_Mode,

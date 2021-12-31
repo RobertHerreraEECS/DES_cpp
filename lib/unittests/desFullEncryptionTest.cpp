@@ -19,6 +19,8 @@ extern "C"
 
 // unit tests based off of 
 // http://page.math.tu-berlin.de/~kant/teaching/hess/krypto-ws2006/des.html
+//
+// These unit tests are based on `zero-padded` or exact block-sized data
 
 // C layer tests
 TEST(singleEncryptTest, singleChunk1) {
@@ -28,6 +30,9 @@ TEST(singleEncryptTest, singleChunk1) {
     // load in the payload as big endian
     uint64_t message = 0xefcdab8967452301;
     DESCtx ctx;
+
+    ctx.pad = ZeroPad;
+    ctx.op = ECB_Mode;
 
     memcpy(ctx.key, (char *) &key, KEY_BYTES);
     ctx.in = (char *) &message;
@@ -44,6 +49,9 @@ TEST(singleEncryptTest, singleChunk2) {
     uint64_t message = 0x8787878787878787;
     DESCtx ctx;
 
+    ctx.pad = ZeroPad;
+    ctx.op = ECB_Mode;
+
     memcpy(ctx.key, (char *) &key, KEY_BYTES);
     ctx.in = (char *) &message;
     ctx.inSize = 8;
@@ -58,6 +66,9 @@ TEST(singleDecryptTest, singleChunk1) {
     uint64_t key = 0x0E329232EA6D0D73;
     uint64_t message = 0x8787878787878787;
     DESCtx ctx;
+
+    ctx.pad = ZeroPad;
+    ctx.op = ECB_Mode;
 
     memcpy(ctx.key, (char *) &key, KEY_BYTES);
     ctx.in = (char *) &C;
@@ -75,6 +86,9 @@ TEST(singleDecryptTest, singleChunk2) {
     uint64_t message = 0xefcdab8967452301;
     DESCtx ctx;
 
+    ctx.pad = ZeroPad;
+    ctx.op = ECB_Mode;
+
     memcpy(ctx.key, (char *) &key, KEY_BYTES);
     ctx.in = (char *) &C;
     ctx.inSize = 8;
@@ -91,6 +105,9 @@ TEST(encryptionTest, test1) {
     uint64_t key = 0x0E329232EA6D0D73;
     uint64_t ciphertext[5] = {0};
     DESCtx ctx;
+
+    ctx.pad = ZeroPad;
+    ctx.op = ECB_Mode;
 
     memcpy(ctx.key, (char *) &key, KEY_BYTES);
     ctx.in = message;
@@ -132,6 +149,9 @@ TEST(decryptionTest, test1) {
     ciphertext[3] = 0x998435f5782fd5d9; // typo in documentation
     ciphertext[4] = 0x53e6e053b4c98a82; // values in little-endian equivalent
  
+    ctx.pad = ZeroPad;
+    ctx.op = ECB_Mode;
+
     memcpy(ctx.key, (char *) &key, KEY_BYTES);
     ctx.in = (char *) ciphertext;
     ctx.inSize = 40;

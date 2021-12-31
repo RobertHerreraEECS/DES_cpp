@@ -52,6 +52,112 @@ public:
      **/
     void decryptECB(char *in, size_t inSize, char **out, size_t *outSize, const char *key);
 
+
+    /**
+     *  @brief encrypt data in place using DES cipher
+     *  in CBC Mode.
+     *  @param in input plaintext to be decrypted
+     *  @param inSize the size of the input plaintext
+     *  @param out output buffer containing encrypted data.
+     *  @param outSize size of the decrypted output buffer.
+     *  @key the key used to decrypt data. This key is to
+     *  be 8 bytes in length. If longer than 8 bytes, only
+     *  the first 8 are copied and used.
+     **/
+    void encryptCBC(char *in, size_t inSize, char **out, size_t *outSize, const char *key);
+
+    /**
+     *  @brief decrypt data in place using DES cipher
+     *  in CBC Mode.
+     *  @param in input plaintext to be decrypted
+     *  @param inSize the size of the input plaintext
+     *  @param out output buffer containing encrypted data.
+     *  @param outSize size of the decrypted output buffer.
+     *  @key the key used to decrypt data. This key is to
+     *  be 8 bytes in length. If longer than 8 bytes, only
+     *  the first 8 are copied and used.
+     **/
+    void decryptCBC(char *in, size_t inSize, char **out, size_t *outSize, const char *key);
+
+    /**
+     *  @brief encrypt data in place using DES cipher
+     *  in CFB Mode.
+     *  @param in input plaintext to be decrypted
+     *  @param inSize the size of the input plaintext
+     *  @param out output buffer containing encrypted data.
+     *  @param outSize size of the decrypted output buffer.
+     *  @key the key used to decrypt data. This key is to
+     *  be 8 bytes in length. If longer than 8 bytes, only
+     *  the first 8 are copied and used.
+     **/
+    void encryptCFB(char *in, size_t inSize, char **out, size_t *outSize, const char *key);
+
+    /**
+     *  @brief decrypt data in place using DES cipher
+     *  in CFB Mode.
+     *  @param in input plaintext to be decrypted
+     *  @param inSize the size of the input plaintext
+     *  @param out output buffer containing encrypted data.
+     *  @param outSize size of the decrypted output buffer.
+     *  @key the key used to decrypt data. This key is to
+     *  be 8 bytes in length. If longer than 8 bytes, only
+     *  the first 8 are copied and used.
+     **/
+    void decryptCFB(char *in, size_t inSize, char **out, size_t *outSize, const char *key);
+
+
+    /**
+     *  @brief encrypt data in place using DES cipher
+     *  in OFB Mode.
+     *  @param in input plaintext to be decrypted
+     *  @param inSize the size of the input plaintext
+     *  @param out output buffer containing encrypted data.
+     *  @param outSize size of the decrypted output buffer.
+     *  @key the key used to decrypt data. This key is to
+     *  be 8 bytes in length. If longer than 8 bytes, only
+     *  the first 8 are copied and used.
+     **/
+    void encryptOFB(char *in, size_t inSize, char **out, size_t *outSize, const char *key);
+
+    /**
+     *  @brief decrypt data in place using DES cipher
+     *  in OFB Mode.
+     *  @param in input plaintext to be decrypted
+     *  @param inSize the size of the input plaintext
+     *  @param out output buffer containing encrypted data.
+     *  @param outSize size of the decrypted output buffer.
+     *  @key the key used to decrypt data. This key is to
+     *  be 8 bytes in length. If longer than 8 bytes, only
+     *  the first 8 are copied and used.
+     **/
+    void decryptOFB(char *in, size_t inSize, char **out, size_t *outSize, const char *key);
+
+    /**
+     *  @brief decrypt data in place using DES cipher
+     *  @param ctx DES Crypto Context
+     *  @param in input plaintext to be decrypted
+     *  @param inSize the size of the input plaintext
+     *  @param out output buffer containing encrypted data.
+     *  @param outSize size of the decrypted output buffer.
+     *  @key the key used to decrypt data. This key is to
+     *  be 8 bytes in length. If longer than 8 bytes, only
+     *  the first 8 are copied and used.
+     **/
+    void encrypt(DESCtx *ctx,char *in, size_t inSize, char **out, size_t *outSize, const char *key);
+
+    /**
+     *  @brief decrypt data in place using DES cipher
+     *  @param ctx DES Crypto Context
+     *  @param in input plaintext to be decrypted
+     *  @param inSize the size of the input plaintext
+     *  @param out output buffer containing encrypted data.
+     *  @param outSize size of the decrypted output buffer.
+     *  @key the key used to decrypt data. This key is to
+     *  be 8 bytes in length. If longer than 8 bytes, only
+     *  the first 8 are copied and used.
+     **/
+    void decrypt(DESCtx *ctx,char *in, size_t inSize, char **out, size_t *outSize, const char *key);
+
     /**
     * @brief sanitize the generated crypto context and free
     *   allocated buffers.

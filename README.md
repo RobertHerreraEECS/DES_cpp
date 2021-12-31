@@ -2,7 +2,7 @@
 
 DES Encryption is a c++ based application that aims to re-work an initial implementation of the DES cipher that bradosev03 and I did a few years ago. 
 
-OpenSSL supports PKCS padding by default so its recommeded that you use this in PKCS5 padding mode. This padding scheme is more reliable compared to zero padding which is not as supported and contains edge cases where you may not be able to recover the original plaintext data.
+OpenSSL supports PKCS padding by default so its recommeded that you use this in PKCS5 padding mode. This padding scheme is more reliable compared to zero padding. Zero padding contains edge cases where you may not be able to guarantee exact recovery the original plaintext data.
 
 ## Notes
 execute:

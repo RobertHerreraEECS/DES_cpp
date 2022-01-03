@@ -1,13 +1,10 @@
 cmake_minimum_required (VERSION 3.1.0)
-project (encryption)
+project (libdes)
 
 set(CMAKE_CXX_STANDARD 11)
 
-# use, i.e. don't skip the full RPATH for the build tree
 SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
 
-# when building, don't use the install RPATH already
-# (but later on when installing)
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
 
 SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")

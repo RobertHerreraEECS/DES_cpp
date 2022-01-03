@@ -130,7 +130,6 @@ CryptAPI encryptBlocksECB(DESCtx *ctx, bool cryptType) {
 
         dataPtr++;
     }
-
     return CRYPT_SUCCESS;
 }
 

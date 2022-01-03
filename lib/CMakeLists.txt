@@ -11,9 +11,9 @@ add_library(des_src
 
 # main executable
 add_executable(
-  main
+  cryptdes
   main.cpp
 )
-target_link_libraries(main des_src)
+target_link_libraries(cryptdes des_src)
 
 add_subdirectory(unittests)

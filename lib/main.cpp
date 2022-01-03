@@ -1,7 +1,10 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <map>
+
 #include "encryption.h"
+
 #include <unistd.h>
 #include <stdio.h>
 
@@ -15,6 +18,14 @@ string cipherMode;
 string operation;
 string ivkey;
 string padmode;
+
+
+map<string, Operation_T> operation_map = { 
+                         { "ecb", ECB_Mode},
+                         { "cbc", CBC_Mode},
+                         { "ofb", OFB_Mode},
+                         { "cfb", CFB_Mode},
+                         }; 
 
 uint64_t unhexlify(string hexlified) {
     size_t idx = 0;
@@ -40,7 +51,7 @@ void usage() {
     cout << "OpenSSL and have been tested against OpenSSL-generated\n";
     cout << "encrypted/decrypted blobs.\n";
     cout << "\n\nexample:\n";
-    cout << "./main plaintext ciphertext -K deadbeeffacefade -C enc\n";
+    cout << "./cryptdes plaintext ciphertext -K deadbeeffacefade -C enc\n";
 }
 
 
@@ -51,7 +62,7 @@ int parseArgs(int argc, char *argv[]) {
     infile = string(argv[1]);
     outfile = string(argv[2]);
 
-    while ((ret = getopt (argc, argv, "K:C:M:P:")) != -1) {
+    while ((ret = getopt (argc, argv, "K:C:M:P:N:")) != -1) {
         switch (ret)
           {
           case 'C':
@@ -88,8 +99,24 @@ int parseArgs(int argc, char *argv[]) {
             break;
           default:
             usage();
-            abort();
+            exit(-1);
           }
+    }
+
+    if (mflag && !(operation.compare("cbc") ||
+                   operation.compare("ofb") ||
+                   operation.compare("cfb") ||
+                   operation.compare("ecb"))) {
+        fprintf (stderr,"Unknown mode of operation..\n");
+        usage();
+        return 0;
+    }
+
+    if (mflag && (operation == "cbc" || operation == "ofb"
+        || operation == "cfb") && !nflag) {
+        fprintf (stderr,"Missing required `IV` argument -N\n");
+        usage();
+        return 0;
     }
 
     if (!kflag || !cflag) {
@@ -104,9 +131,9 @@ int main(int argc, char *argv[]){
 
     CryptoDES desCryptCtx;
     std::vector<char> buffer;
-    uint64_t key = 0x0E329232EA6D0D73;
     char *output;
     size_t osize;
+    CryptAPI result;
 
     if (argc < 4) {
         usage();
@@ -117,6 +144,13 @@ int main(int argc, char *argv[]){
 
     desCryptCtx.setKey(unhexlify(hexkey));
 
+    if (operation == "ecb") {
+        
+    } else if (operation == "cbc" | operation == "cfb"
+            || operation == "ofb") {
+        desCryptCtx.setIV(unhexlify(ivkey));
+    }
+
     std::ifstream file(infile, std::ios::binary | std::ios::ate);
     std::streamsize size = file.tellg();
     file.seekg(0, std::ios::beg);
@@ -126,17 +160,48 @@ int main(int argc, char *argv[]){
         buffer.assign(size, 0);
         file.read(buffer.data(), size);
     } else {
-        cout << "error opening file...\n";
+        cout << "error opening file..." << endl;
     }
 
-    cout << string(buffer.begin(), buffer.end()) << endl;
-
-    //TODO: finish out input-based modes
-    desCryptCtx.encryptCFB((char *) buffer.data(), buffer.size(), &output, &osize, (const char *)&key);
+    switch(operation_map[operation]) {
+        case ECB_Mode:
+            result = desCryptCtx.encryptECB((char *) buffer.data(),
+                                            buffer.size(),
+                                            &output,
+                                            &osize);
+            break;
+        case CBC_Mode:
+            result = desCryptCtx.encryptCBC((char *) buffer.data(),
+                                            buffer.size(), 
+                                            &output,
+                                            &osize);
+            break;
+        case OFB_Mode:
+            result = desCryptCtx.encryptOFB((char *) buffer.data(),
+                                            buffer.size(),
+                                            &output,
+                                            &osize);
+            break;
+        case CFB_Mode:
+            result = desCryptCtx.encryptCFB((char *) buffer.data(),
+                                            buffer.size(),
+                                            &output,
+                                            &osize);
+            break;
+        default:
+            cout << "Unknown mode of operation" << endl;
+            usage();
+            exit(-1);
+    }
+    //desCryptCtx.finish();
+    if (result != CRYPT_SUCCESS) {
+        cout << "Error occurred with encryption" << endl;
+        return result;
+    }
+    
 
     std::ofstream ofile(outfile, std::ios::binary | std::ios::ate);
     if (ofile.is_open()) {
-      cout << "Writing encrypted data to file..." << endl;
       ofile.write(output, osize);
     } else {
         cout << "error opening file.\n";

@@ -17,96 +17,138 @@ uint64_t CryptoDES::getKey() { return m_key; }
 
 void CryptoDES::setKey(uint64_t key) { m_key = key; }
 
-void CryptoDES::encryptECB(char *in, size_t inSize, char **out, size_t *outSize, const char *key) {
+void CryptoDES::setIV(uint64_t iv) { m_iv = iv; }
+
+
+CryptAPI CryptoDES::encryptECB(char *in, 
+                           size_t inSize,
+                           char **out,
+                           size_t *outSize) {
+    CryptAPI ret;
     DESCtx *ctx = (DESCtx *) malloc(sizeof(DESCtx));
 
     ctx->pad = PKCS5Pad;
     ctx->op = ECB_Mode;
-    this->encrypt(ctx, in, inSize, out, outSize, key);
+    ret = this->encrypt(ctx, in, inSize, out, outSize, (const char *) &m_key);
+    return ret;
 }
 
-void CryptoDES::decryptECB(char *in, size_t inSize, char **out, size_t *outSize, const char *key) {
+CryptAPI CryptoDES::decryptECB(char *in,
+                           size_t inSize,
+                           char **out,
+                           size_t *outSize) {
     DESCtx *ctx = (DESCtx *) malloc(sizeof(DESCtx));
 
     ctx->pad = PKCS5Pad;
     ctx->op = ECB_Mode;
-    this->decrypt(ctx, in, inSize, out, outSize, key);
+    return this->decrypt(ctx, in, inSize, out, outSize,  (const char *) &m_key);
 }
 
-void CryptoDES::encryptCBC(char *in, size_t inSize, char **out, size_t *outSize, const char *key) {
+CryptAPI CryptoDES::encryptCBC(char *in,
+                           size_t inSize,
+                           char **out,
+                           size_t *outSize) {
     DESCtx *ctx = (DESCtx *) malloc(sizeof(DESCtx));
 
     ctx->pad = PKCS5Pad;
     ctx->op = CBC_Mode;
-    this->encrypt(ctx, in, inSize, out, outSize, key);
+    return this->encrypt(ctx, in, inSize, out, outSize, (const char *) &m_key);
 }
 
-void CryptoDES::decryptCBC(char *in, size_t inSize, char **out, size_t *outSize, const char *key) {
+CryptAPI CryptoDES::decryptCBC(char *in,
+                           size_t inSize,
+                           char **out,
+                           size_t *outSize) {
     DESCtx *ctx = (DESCtx *) malloc(sizeof(DESCtx));
 
 
     ctx->pad = PKCS5Pad;
     ctx->op = CBC_Mode;
-    this->decrypt(ctx, in, inSize, out, outSize, key);
+    return this->decrypt(ctx, in, inSize, out, outSize,  (const char *) &m_key);
 }
 
-void CryptoDES::encryptCFB(char *in, size_t inSize, char **out, size_t *outSize, const char *key) {
+CryptAPI CryptoDES::encryptCFB(char *in,
+                           size_t inSize,
+                           char **out,
+                           size_t *outSize) {
     DESCtx *ctx = (DESCtx *) malloc(sizeof(DESCtx));
 
     ctx->pad = PKCS5Pad;
     ctx->op = CFB_Mode;
-    this->encrypt(ctx, in, inSize, out, outSize, key);
+    return this->encrypt(ctx, in, inSize, out, outSize, (const char *) &m_key);
 }
 
-void CryptoDES::decryptCFB(char *in, size_t inSize, char **out, size_t *outSize, const char *key) {
+CryptAPI CryptoDES::decryptCFB(char *in,
+                           size_t inSize,
+                           char **out,
+                           size_t *outSize) {
     DESCtx *ctx = (DESCtx *) malloc(sizeof(DESCtx));
 
 
     ctx->pad = PKCS5Pad;
     ctx->op = CFB_Mode;
-    this->decrypt(ctx, in, inSize, out, outSize, key);
+    return this->decrypt(ctx, in, inSize, out, outSize, (const char *) &m_key);
 }
 
-void CryptoDES::encryptOFB(char *in, size_t inSize, char **out, size_t *outSize, const char *key) {
+CryptAPI CryptoDES::encryptOFB(char *in,
+                           size_t inSize,
+                           char **out,
+                           size_t *outSize) {
     DESCtx *ctx = (DESCtx *) malloc(sizeof(DESCtx));
 
     ctx->pad = PKCS5Pad;
     ctx->op = OFB_Mode;
-    this->encrypt(ctx, in, inSize, out, outSize, key);
+    return this->encrypt(ctx, in, inSize, out, outSize, (const char *) &m_key);
 }
 
-void CryptoDES::decryptOFB(char *in, size_t inSize, char **out, size_t *outSize, const char *key) {
+CryptAPI CryptoDES::decryptOFB(char *in,
+                           size_t inSize,
+                           char **out,
+                           size_t *outSize){
     DESCtx *ctx = (DESCtx *) malloc(sizeof(DESCtx));
 
 
     ctx->pad = PKCS5Pad;
     ctx->op = OFB_Mode;
 
-    this->decrypt(ctx, in, inSize, out, outSize, key);
+    return this->decrypt(ctx, in, inSize, out, outSize, (const char *) &m_key);
 }
 
-void CryptoDES::decrypt(DESCtx *ctx, char *in, size_t inSize, char **out, size_t *outSize, const char *key) {
+CryptAPI CryptoDES::decrypt(DESCtx *ctx,
+                        char *in, size_t inSize,
+                        char **out,
+                        size_t *outSize,
+                        const char *key) {
+    CryptAPI ret;
     memcpy(ctx->key, key, KEY_BYTES);
     ctx->in = in;
     ctx->inSize = inSize;
     initialize(ctx);
 
-    finalize(ctx, DecryptT);
+    ret = finalize(ctx, DecryptT);
 
     *outSize = ctx->outSize;
     *out = ctx->out;
+    return ret; 
 }
 
-void CryptoDES::encrypt(DESCtx *ctx, char *in, size_t inSize, char **out, size_t *outSize, const char *key) {
+CryptAPI CryptoDES::encrypt(DESCtx *ctx,
+                        char *in,
+                        size_t inSize,
+                        char **out,
+                        size_t *outSize,
+                        const char *key) {
+    CryptAPI ret;
     memcpy(ctx->key, key, KEY_BYTES);
     ctx->in = in;
     ctx->inSize = inSize;
     initialize(ctx);
 
-    finalize(ctx, EncryptT);
+    ret = finalize(ctx, EncryptT);
 
     *outSize = ctx->outSize;
     *out = ctx->out;
+    return ret;
 }
 
 

@@ -33,11 +33,8 @@ public:
      *  @param inSize the size of the input plaintext
      *  @param out output buffer containing encrypted data.
      *  @param outSize size of the encrypted output buffer.
-     *  @key the key used to encrypt data. This key is to
-     *  be 8 bytes in length. If longer than 8 bytes, only
-     *  the first 8 are copied and used.
      **/
-    void encryptECB(char *in, size_t inSize, char **out, size_t *outSize, const char *key);
+    CryptAPI encryptECB(char *in, size_t inSize, char **out, size_t *outSize);
 
     /**
      *  @brief decrypt data in place using DES cipher
@@ -46,11 +43,8 @@ public:
      *  @param inSize the size of the input plaintext
      *  @param out output buffer containing encrypted data.
      *  @param outSize size of the decrypted output buffer.
-     *  @key the key used to decrypt data. This key is to
-     *  be 8 bytes in length. If longer than 8 bytes, only
-     *  the first 8 are copied and used.
      **/
-    void decryptECB(char *in, size_t inSize, char **out, size_t *outSize, const char *key);
+    CryptAPI decryptECB(char *in, size_t inSize, char **out, size_t *outSize);
 
 
     /**
@@ -60,11 +54,8 @@ public:
      *  @param inSize the size of the input plaintext
      *  @param out output buffer containing encrypted data.
      *  @param outSize size of the decrypted output buffer.
-     *  @key the key used to decrypt data. This key is to
-     *  be 8 bytes in length. If longer than 8 bytes, only
-     *  the first 8 are copied and used.
      **/
-    void encryptCBC(char *in, size_t inSize, char **out, size_t *outSize, const char *key);
+    CryptAPI encryptCBC(char *in, size_t inSize, char **out, size_t *outSize);
 
     /**
      *  @brief decrypt data in place using DES cipher
@@ -73,11 +64,8 @@ public:
      *  @param inSize the size of the input plaintext
      *  @param out output buffer containing encrypted data.
      *  @param outSize size of the decrypted output buffer.
-     *  @key the key used to decrypt data. This key is to
-     *  be 8 bytes in length. If longer than 8 bytes, only
-     *  the first 8 are copied and used.
      **/
-    void decryptCBC(char *in, size_t inSize, char **out, size_t *outSize, const char *key);
+    CryptAPI decryptCBC(char *in, size_t inSize, char **out, size_t *outSize);
 
     /**
      *  @brief encrypt data in place using DES cipher
@@ -86,11 +74,8 @@ public:
      *  @param inSize the size of the input plaintext
      *  @param out output buffer containing encrypted data.
      *  @param outSize size of the decrypted output buffer.
-     *  @key the key used to decrypt data. This key is to
-     *  be 8 bytes in length. If longer than 8 bytes, only
-     *  the first 8 are copied and used.
      **/
-    void encryptCFB(char *in, size_t inSize, char **out, size_t *outSize, const char *key);
+    CryptAPI encryptCFB(char *in, size_t inSize, char **out, size_t *outSize);
 
     /**
      *  @brief decrypt data in place using DES cipher
@@ -99,11 +84,8 @@ public:
      *  @param inSize the size of the input plaintext
      *  @param out output buffer containing encrypted data.
      *  @param outSize size of the decrypted output buffer.
-     *  @key the key used to decrypt data. This key is to
-     *  be 8 bytes in length. If longer than 8 bytes, only
-     *  the first 8 are copied and used.
      **/
-    void decryptCFB(char *in, size_t inSize, char **out, size_t *outSize, const char *key);
+    CryptAPI decryptCFB(char *in, size_t inSize, char **out, size_t *outSize);
 
 
     /**
@@ -113,11 +95,8 @@ public:
      *  @param inSize the size of the input plaintext
      *  @param out output buffer containing encrypted data.
      *  @param outSize size of the decrypted output buffer.
-     *  @key the key used to decrypt data. This key is to
-     *  be 8 bytes in length. If longer than 8 bytes, only
-     *  the first 8 are copied and used.
      **/
-    void encryptOFB(char *in, size_t inSize, char **out, size_t *outSize, const char *key);
+    CryptAPI encryptOFB(char *in, size_t inSize, char **out, size_t *outSize);
 
     /**
      *  @brief decrypt data in place using DES cipher
@@ -126,11 +105,8 @@ public:
      *  @param inSize the size of the input plaintext
      *  @param out output buffer containing encrypted data.
      *  @param outSize size of the decrypted output buffer.
-     *  @key the key used to decrypt data. This key is to
-     *  be 8 bytes in length. If longer than 8 bytes, only
-     *  the first 8 are copied and used.
      **/
-    void decryptOFB(char *in, size_t inSize, char **out, size_t *outSize, const char *key);
+    CryptAPI decryptOFB(char *in, size_t inSize, char **out, size_t *outSize);
 
     /**
      *  @brief decrypt data in place using DES cipher
@@ -139,11 +115,8 @@ public:
      *  @param inSize the size of the input plaintext
      *  @param out output buffer containing encrypted data.
      *  @param outSize size of the decrypted output buffer.
-     *  @key the key used to decrypt data. This key is to
-     *  be 8 bytes in length. If longer than 8 bytes, only
-     *  the first 8 are copied and used.
      **/
-    void encrypt(DESCtx *ctx,char *in, size_t inSize, char **out, size_t *outSize, const char *key);
+    CryptAPI encrypt(DESCtx *ctx,char *in, size_t inSize, char **out, size_t *outSize, const char *key);
 
     /**
      *  @brief decrypt data in place using DES cipher
@@ -152,11 +125,8 @@ public:
      *  @param inSize the size of the input plaintext
      *  @param out output buffer containing encrypted data.
      *  @param outSize size of the decrypted output buffer.
-     *  @key the key used to decrypt data. This key is to
-     *  be 8 bytes in length. If longer than 8 bytes, only
-     *  the first 8 are copied and used.
      **/
-    void decrypt(DESCtx *ctx,char *in, size_t inSize, char **out, size_t *outSize, const char *key);
+    CryptAPI decrypt(DESCtx *ctx,char *in, size_t inSize, char **out, size_t *outSize, const char *key);
 
     /**
     * @brief sanitize the generated crypto context and free
@@ -172,6 +142,10 @@ public:
 
     /**
     * @brief set 64 bit key.
+    *
+    * The key used to encrypt/decrypt data. This key is to
+    * be 8 bytes in length. If longer than 8 bytes, only
+    * the first 8 are copied and used.
     *
     * Use unhexlify to transform a hexlified key.
     */

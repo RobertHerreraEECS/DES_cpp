@@ -298,9 +298,11 @@ CryptAPI encryptBlocksOFB(DESCtx *ctx, bool cryptType) {
 
 void sanitize(DESCtx *ctx) {
     if (ctx->out != NULL) {
+        memset(ctx->out, 0, ctx->outSize);
         free(ctx->out);
     } else { return; }
     memset(ctx, 0, sizeof(DESCtx));
+    free(ctx);
 }
 
 void CryptDES(uint64_t *message,uint64_t *subkeys, bool decrypt) {

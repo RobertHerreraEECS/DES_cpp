@@ -58,6 +58,13 @@ CPP main output is compared against OpenSSL in several modes of operation.
 
 # Supported Modes of Operation
 * ECB
-* CBC
-* CFB
-* OFB
+* CBC (in test)
+* CFB (in test)
+* OFB (in test)
+
+# Misc
+Initial test vectors used in test cases are from http://page.math.tu-berlin.de/~kant/teaching/hess/krypto-ws2006/des.html
+Additional testing compared against openssl outputs.
+
+ 
+   

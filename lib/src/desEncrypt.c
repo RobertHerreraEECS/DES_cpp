@@ -3,6 +3,8 @@ extern "C"
 {
 #endif
 
+//TODO: finish the ports for BSD and windows based platforms
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -297,7 +299,7 @@ CryptAPI encryptBlocksOFB(DESCtx *ctx, bool cryptType) {
 void sanitize(DESCtx *ctx) {
     if (ctx->out != NULL) {
         free(ctx->out);
-    }
+    } else { return; }
     memset(ctx, 0, sizeof(DESCtx));
 }
 

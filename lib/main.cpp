@@ -163,6 +163,7 @@ int main(int argc, char *argv[]){
         cout << "error opening file..." << endl;
     }
 
+    cout << operation_map[operation] << endl;
     switch(operation_map[operation]) {
         case ECB_Mode:
             result = desCryptCtx.encryptECB((char *) buffer.data(),
@@ -193,12 +194,11 @@ int main(int argc, char *argv[]){
             usage();
             exit(-1);
     }
-    //desCryptCtx.finish();
+    
     if (result != CRYPT_SUCCESS) {
         cout << "Error occurred with encryption" << endl;
         return result;
     }
-    
 
     std::ofstream ofile(outfile, std::ios::binary | std::ios::ate);
     if (ofile.is_open()) {
@@ -206,5 +206,8 @@ int main(int argc, char *argv[]){
     } else {
         cout << "error opening file.\n";
     }
+
+    desCryptCtx.finish();
+
     return 0;
  }

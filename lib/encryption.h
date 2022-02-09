@@ -108,31 +108,12 @@ public:
      **/
     CryptAPI decryptOFB(char *in, size_t inSize, char **out, size_t *outSize);
 
-    /**
-     *  @brief decrypt data in place using DES cipher
-     *  @param ctx DES Crypto Context
-     *  @param in input plaintext to be decrypted
-     *  @param inSize the size of the input plaintext
-     *  @param out output buffer containing encrypted data.
-     *  @param outSize size of the decrypted output buffer.
-     **/
-    CryptAPI encrypt(DESCtx *ctx,char *in, size_t inSize, char **out, size_t *outSize, const char *key);
-
-    /**
-     *  @brief decrypt data in place using DES cipher
-     *  @param ctx DES Crypto Context
-     *  @param in input plaintext to be decrypted
-     *  @param inSize the size of the input plaintext
-     *  @param out output buffer containing encrypted data.
-     *  @param outSize size of the decrypted output buffer.
-     **/
-    CryptAPI decrypt(DESCtx *ctx,char *in, size_t inSize, char **out, size_t *outSize, const char *key);
 
     /**
     * @brief sanitize the generated crypto context and free
     *   allocated buffers.
     */
-    CryptAPI finish();
+    void finish();
 
     /**
     * @brief get key currently loaded
@@ -177,6 +158,26 @@ public:
 private:
 
     /**
+     *  @brief decrypt data in place using DES cipher
+     *  @param ctx DES Crypto Context
+     *  @param in input plaintext to be decrypted
+     *  @param inSize the size of the input plaintext
+     *  @param out output buffer containing encrypted data.
+     *  @param outSize size of the decrypted output buffer.
+     **/
+    CryptAPI encrypt(DESCtx *ctx,char *in, size_t inSize, char **out, size_t *outSize, const char *key);
+
+    /**
+     *  @brief decrypt data in place using DES cipher
+     *  @param ctx DES Crypto Context
+     *  @param in input plaintext to be decrypted
+     *  @param inSize the size of the input plaintext
+     *  @param out output buffer containing encrypted data.
+     *  @param outSize size of the decrypted output buffer.
+     **/
+    CryptAPI decrypt(DESCtx *ctx,char *in, size_t inSize, char **out, size_t *outSize, const char *key);
+
+    /**
     * @brief get random 64 bit value
     * @return uint64_t
     */
@@ -185,6 +186,7 @@ private:
     uint64_t m_key;                // encryption key
     uint64_t m_iv;                 // intialization vector
     uint64_t m_nonce;              // nonce for Counter Mode
+    DESCtx  *m_ctx;                 // ctx in use for DES cipher
     PadMode  m_padMode = PKCS5Pad; // default padding mode
     std::mt19937 m_gen;
 

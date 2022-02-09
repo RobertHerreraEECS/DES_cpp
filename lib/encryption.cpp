@@ -4,6 +4,8 @@
 #include <string>
 #include <cstring>
 
+
+
 CryptoDES::CryptoDES() {
     m_key = 0x0;
 
@@ -26,6 +28,7 @@ CryptAPI CryptoDES::encryptECB(char *in,
                            size_t *outSize) {
     CryptAPI ret;
     DESCtx *ctx = (DESCtx *) malloc(sizeof(DESCtx));
+    m_ctx = ctx;
 
     ctx->pad = PKCS5Pad;
     ctx->op = ECB_Mode;
@@ -38,6 +41,7 @@ CryptAPI CryptoDES::decryptECB(char *in,
                            char **out,
                            size_t *outSize) {
     DESCtx *ctx = (DESCtx *) malloc(sizeof(DESCtx));
+    m_ctx = ctx;
 
     ctx->pad = PKCS5Pad;
     ctx->op = ECB_Mode;
@@ -49,6 +53,7 @@ CryptAPI CryptoDES::encryptCBC(char *in,
                            char **out,
                            size_t *outSize) {
     DESCtx *ctx = (DESCtx *) malloc(sizeof(DESCtx));
+    m_ctx = ctx;
 
     ctx->pad = PKCS5Pad;
     ctx->op = CBC_Mode;
@@ -60,6 +65,7 @@ CryptAPI CryptoDES::decryptCBC(char *in,
                            char **out,
                            size_t *outSize) {
     DESCtx *ctx = (DESCtx *) malloc(sizeof(DESCtx));
+    m_ctx = ctx;
 
 
     ctx->pad = PKCS5Pad;
@@ -72,6 +78,7 @@ CryptAPI CryptoDES::encryptCFB(char *in,
                            char **out,
                            size_t *outSize) {
     DESCtx *ctx = (DESCtx *) malloc(sizeof(DESCtx));
+    m_ctx = ctx;
 
     ctx->pad = PKCS5Pad;
     ctx->op = CFB_Mode;
@@ -95,6 +102,7 @@ CryptAPI CryptoDES::encryptOFB(char *in,
                            char **out,
                            size_t *outSize) {
     DESCtx *ctx = (DESCtx *) malloc(sizeof(DESCtx));
+    m_ctx = ctx;
 
     ctx->pad = PKCS5Pad;
     ctx->op = OFB_Mode;
@@ -106,6 +114,7 @@ CryptAPI CryptoDES::decryptOFB(char *in,
                            char **out,
                            size_t *outSize){
     DESCtx *ctx = (DESCtx *) malloc(sizeof(DESCtx));
+    m_ctx = ctx;
 
 
     ctx->pad = PKCS5Pad;
@@ -151,6 +160,9 @@ CryptAPI CryptoDES::encrypt(DESCtx *ctx,
     return ret;
 }
 
+void CryptoDES::finish() {
+   sanitize(m_ctx); 
+}
 
 void CryptoDES::initializeNonce() { m_nonce = getRandU64(); }
 

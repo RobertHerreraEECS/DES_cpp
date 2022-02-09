@@ -300,7 +300,8 @@ void sanitize(DESCtx *ctx) {
     if (ctx->out != NULL) {
         memset(ctx->out, 0, ctx->outSize);
         free(ctx->out);
-    } else { return; }
+    }
+    if (ctx == NULL) return;
     memset(ctx, 0, sizeof(DESCtx));
     free(ctx);
 }
